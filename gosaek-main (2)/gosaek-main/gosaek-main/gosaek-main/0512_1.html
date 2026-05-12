@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<head>
+<meta charset="UTF-8">
+
+<title></title>
+<style>
+    .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: #4f46e5;
+    }
+    .menu {
+        display: flex;
+        list-style: none;
+    }
+    .menu a {
+        text-decoration: none;
+        color: #555555;
+        font-weight: 600;
+    }
+    .menu a:hover {
+        color: #4f46e5;
+    }
+    nav {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #hero {
+        justify-content: space-between;
+        align-items: center;
+    }
+</style>
+</head>
+
+
+<body>
+    <header>
+        <nav>
+            <div class="logo">MY PROFILE</div>
+            <ul class="menu">
+                <li><a href="#hero">소개</a></li>
+                <li><a href="#interests">관심사</a></li>
+                <li><a href="#contact">연락처</a></li>
+            </ul>
+            
+        </nav>
+
+    </header>
+    <section id="hero">
+        <img src="#">
+        <div><h1>안녕하세요 </h1>
+        <p>매일매일 코딩을 공부하고 있겠냐</p>
+        </div>
+    
+    </section>
+    <section id="interests"></section>
+    <section id="contact">
+        <h2>연락처</h2>
+        <div>
+        <label>이름</label>
+        <input type="text" placeholder="이름을 입력하세요.">
+        </div>
+        <div>
+        <a href="javascript:confirm('이름을 입력해주세요!')">
+            <button type="submit">보내기</button>
+        </a>
+        </div>
+    </section>
+    <footer></footer>
+</body>

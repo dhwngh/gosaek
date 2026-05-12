@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>고색고 0324 수업 </title>
+
+        <style>
+            input {
+                color: violet;
+                font-size: 30px;
+                font-weight: bold;
+            }
+
+            input[type=text] {
+                color: violet;
+                font-size: 50px;
+                width: 100px;
+            }
+
+            img[src] {
+                border: 5px solid navy;
+            }
+
+        </style>
+
+
+
+        <body>
+            <img src="1.webp" width="600">    
+
+            <form>
+                이름 : <input type="text" name="user_name"> <br>
+                아이디 : <input type="text" name="user_id"> <br>
+                비밀번호 : <input type="password" name="user_pw"> <br>
+                연락처 : <input type="text" name="first_phone_number" size="3">-<input type="text" name="second_phone_number" size="3">-<input type="text" name="thrid_phone_number" size="3"><br>
+                사진 : <input type="file" name="user_image"> <br>
+                성별 : <input type="radio" name="gender" value="m">남 <input type="radio" name="gender" value="f">여자 <br>
+                사용언어 : <input type="checkbox" name="lan" value="KOR" checked="checked">한글
+                <input type="checkbox" name="lan" value="ENG">영어
+                <input type="checkbox" name="lan" value="CHI">중국어
+                <input type="checkbox" name="lan" value="JPN">일본어
+                <input type="checkbox" name="lan" value="FRA">불어 <br>
+                자기소개 : <textarea name="intro" rows="S" cols="40"></textarea>
+            </form>
+            
+            <br>
+            <br>
+            <select>
+                <option>KOREA</option>
+                <option>USA</option> 
+                <option>CHINA</option>
+                <option>JAPAN</option>
+            </select>
+            <br>
+            <br>
+            좋아하는 음식:
+            <select multiple="multiple">
+                <option>치킨</option>
+                <option>피자</option>
+                <option>햄버거</option>
+                <option>떡볶이</option>
+                <option>닭발</option>
+
+            </select>
+            <br>
+            <input type="submit">
+            <br>
+
+            <video controls="controls">
+                <source src="video/411.mp4" type="video/mp4">
+            </video>    
+
+
+            <video src="video/411.mp4" type="video/mp4" controls="controls"></video>
+
+        </body>
+    </head>
+</html>
