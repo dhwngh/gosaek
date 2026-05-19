@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>0519 수행평가</title>
+
+    <style>
+        /* 상단 메뉴바 배치 */
+        header {
+            /* 요소들을 가로로 배치 */
+            display: flex; 
+            justify-content: space-between;
+        
+        }
+
+        .cards-container {
+            display: grid;
+            /* 1:1:1 비율로 똑같은 크기의 가로 3칸을 만듦 */
+            grid-template-columns: repeat(3, 1fr);
+
+        }
+
+        .bth-point {
+            background-color: #4f46e5;
+            color: white;
+        }
+        .logo {
+        font-size: 20px;
+        font-weight: bold;
+        color: #4f46e5;
+    }
+    
+    .menu {
+        display: flex;
+        list-style: none;
+    }
+    .menu a {
+        text-decoration: none;
+        color: #555555;
+        font-weight: 600;
+    }
+    .menu a:hover {
+        color: #4f46e5;
+    }
+    nav {
+        max-width: 1000px;
+        margin: 0 auto;
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    #home {
+        display: f;
+        justify-content: space-between;
+        align-items: center;
+        border-radius: 40px ;
+    }
+     .menu2 {
+        display: flex;
+        list-style: none;
+    }
+    .menu2 a {
+        text-decoration: none;
+        color: #555555;
+        font-weight: 600;
+    }
+    .menu2 a:hover {
+        color: #4f46e5;
+    }
+    #footer {
+        text-align: center;
+    }
+    #contact {
+       text-align: center;
+
+    }
+    #sendBtn {
+        width: 210px;
+        height: 20px;
+        font-size: 15px;
+        background-color: #4A90E2;
+        cursor: pointer;
+    }
+    .cards-container {
+        background-color: gray;
+        border-radius: 40px 40px 40px 40px; 
+    }
+    #a {
+        background-color: gray;
+        border-radius: 40px 40px 40px 40px;
+
+    }
+    </style>
+</head>
+<body>
+    
+    <header>
+        
+        <nav>
+            <div class="logo">JUHO's PORTFOLIO</div>
+            <ul class="menu">
+                <li><a href="#hero">자기소개 ㅣ</a></li>
+                <li><a href="#interests">활동기록 ㅣ</a></li>
+                <li><a href="#contact">연락하기 </a></li>
+            </ul>
+            
+        </nav>
+    </header>
+    
+    <hr> <selection id="home">
+        <div>
+            <h1>꿈을 기록하며 성장하는 홍길동 입니다.</h1>
+            <p>저는 세상을 따뜻하게 만드는 심리학자를 꿈꾸고 있습니다. 학교 안팍에서의 다양한 경험을 이곳에 기록합니다.</p>
+            <img src="image/profile.avif">
+            <nav>
+                <ul class="menu2">
+                <li><a href="#hero">활동기록ㅣ</a></li>
+                <li><a href="#interests">응원 메시지</a></li>
+            </ul></nav>
+            
+        </div>
+    </selection>
+
+<section id="interest">
+    <div class="cards-container">
+        <!-- 6개의 카드 생성 -->
+        <article>
+        <div id="1">
+            <!-- 사진의 크기를 300 테두리는 둥글게  -->
+            <img src="image/img1.avif" width="300" style="border-radius: 10px;">
+            <h3>동아리</h3>
+            <h2>심리학 탐구 동아리활동</h2>
+            <p>청소년기 심리 변화를 주제로 보고서를 작성</p>
+        </div></article>
+        
+        <article><div id="2">
+            <img src="image/img2.avif" width="300" style="border-radius: 10px;">
+            <h3>교과탐구</h3>
+            <h2>수학탐구: 프렉탈 구조</h2>
+            <p>자연속의 수학적 원리 조사 및 발표</p>
+        </div></article>
+        
+        <article><div id="3">
+            <img src="image/img3.avif" width="300" style="border-radius: 10px;">
+            <h3>봉사</h3>
+            <h2>지역 도서관 교육 봉사</h2>
+            <p>초등학생 대상 한글 읽기 지도 활동</p>
+        </div></article>
+        
+        <article><div id="4">
+            <img src="image/img4.avif" width="300" style="border-radius: 10px;">
+            <h3>교과탐구</h3>
+            <h2>교내 토론 대회 금상 수상</h2>
+            <p>AI와 윤리적 책임에 대한 진지한 토론</p>
+        </div></article>
+        
+        <article><div id="5">
+            <img src="image/img5.avif" width="300" style="border-radius: 10px;">
+            <h3>기타</h3>
+            <h2>대학교 전공 체험 캠프</h2>
+            <p>대학 캠퍼스 투어 및 선배와의 만남</p>
+        </div></article>
+        
+        <article><div id="6">
+            <img src="image/img6.avif" width="300" style="border-radius: 10px;">
+            <h3>교과탐구</h3>
+            <h2>과학 실험: 광합성 속도 측정</h2>
+            <p>빛의 세기에 따른 실험 수행 및 분석</p>
+        </div></article>
+    </div>
+</section>
+
+<sention id="contact">
+    <h5>보내는분 성함 *</h5>
+    <div  style="display: flex; justify-content: center;">
+    <!-- 입력받는 칸에 '성함을 입력해주세요'라는 문자열을 띄우고 크기를 200px로 설정 -->
+    <input type="text" id="name input" placeholder="성함을 입력해주세요",  style="width: 200px; height: 20px;"></div>
+    
+    <h5>이메일 주소 *</h5>
+    <div style="display: flex; justify-content: center;"><input type="text" id="email input" placeholder="example@emailcom", style="width: 200px; height: 20px;"></div>
+    
+    <h5>메시지 내용 *</h5>
+    
+    <div style="display: flex; justify-content: center;"><textarea id="messageInput" placeholder="응원 한마디 부탁드려요!", style="width: 200px; height: 60px;"></textarea></div>
+    <div id = btn><button id="sendBtn" >메시지 보내기</button>
+    </div>
+</sention>
+<section id="footer">
+    <div><footer>
+        2026 오주호. 20914 오주호 정보 수행평가
+    </footer></div>
+    
+</section>
+    <script>
+        const nameInput = document.getElementById('nameInput')
+        const sendBtn = document.getElementById('sendBtn')
+        
+        sendBtn.addEventListener('click', function() {
+            if (nameInput.value.trim() === '') {
+                alert('이름을 입력해 주세요')
+            } else {
+                alert('메시지가 전송되었습니다.');
+            }
+        });
+    </script>
+
+
+
+
+
+</body>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+</html>
