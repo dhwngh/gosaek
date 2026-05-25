@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슈퍼 고색고 월드 (Super Gosaekgo World)</title>
+    <style>
+        /* 폰트 대폭 강화: 영문 전용 픽셀 폰트와 한글 전용 레트로 도트 폰트 동시 로드 */
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+        @import url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/DungGeunMo.woff');
+
+        /* 📺 8비트 마리오 월드 스테이지 배경 및 기본 레이아웃 */
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #5c94fc; /* 오리지널 마리오 하늘색 */
+            /* 배경 위에 도트 스크린 격자 필터 씌우기 */
+            background-image: 
+                linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
+            background-size: 16px 16px;
+            font-family: 'DungGeunMo', 'Press Start 2P', cursive, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            overflow-x: hidden;
+            color: #ffffff;
+            image-rendering: pixelated;
+        }
+
+        /* ☁️ 배경용 도트 구름 애니메이션 이펙트 */
+        body::before {
+            content: "☁️    ☁️☁️        ☁️             ☁️☁️";
+            position: fixed;
+            top: 120px;
+            left: -100px;
+            font-size: 3rem;
+            opacity: 0.25;
+            letter-spacing: 150px;
+            white-space: nowrap;
+            animation: cloudMove 60s linear infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes cloudMove {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(100vw); }
+        }
+
+        /* 👑 상단 전광판 스코어보드 디자인 (마리오 UI 스타일) */
+        header {
+            text-align: center;
+            margin-top: 30px;
+            margin-bottom: 10px;
+            z-index: 10;
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header h1 {
+            font-family: 'Press Start 2P', 'DungGeunMo', sans-serif;
+            font-size: 2.2rem;
+            color: #f1c40f; /* 마리오 황금 코인 색상 */
+            text-shadow: 5px 5px 0px #000;
+            margin: 0 0 12px 0;
+            letter-spacing: -1px;
+        }
+
+        .score-board {
+            display: flex;
+            justify-content: space-between;
+            width: 80%;
+            font-size: 1.1rem;
+            text-shadow: 3px 3px 0px #000;
+            border-bottom: 4px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 20px;
+        }
+
+        .score-board span {
+            color: #ffffff;
+        }
+        .score-board em {
+            color: #ff4d4d;
+            font-style: normal;
+        }
+
+        /* 🌳 스테이지 판넬 & 거대 도트 나무 컨테이너 */
+        .arcade-stage {
+            position: relative;
+            width: 1020px;
+            height: 650px;
+            margin-top: 10px;
+            z-index: 2;
+        }
+
+        /* 🧱 마리오 스타일 흙/벽돌 바닥 레이어 구성 */
+        .ground-floor {
+            position: absolute;
+            bottom: -60px;
+            left: -50px;
+            width: 1120px;
+            height: 60px;
+            /* 테두리가 선명한 갈색 격자 무늬 도트 블록 질감 연출 */
+            background-color: #d35400;
+            background-image: 
+                linear-gradient(90deg, #a04000 4px, transparent 4px),
+                linear-gradient(#a04000 4px, transparent 4px),
+                linear-gradient(90deg, rgba(255,255,255,0.3) 2px, transparent 2px),
+                linear-gradient(rgba(255,255,255,0.3) 2px, transparent 2px);
+            background-size: 20px 20px, 20px 20px, 20px 20px, 20px 20px;
+            background-position: 0 0, 0 0, 2px 2px, 2px 2px;
+            border-top: 6px solid #4a2700;
+            box-shadow: 0 8px 0 #000;
+            z-index: 4;
+        }
+
+        /* 도트로 그리는 거대한 버섯 모양 나무 기둥 */
+        .arcade-trunk {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 300px;
+            background: #e67e22; 
+            border: 5px solid #000;
+            border-bottom: none;
+            box-shadow: inset -15px 0px 0px #d35400;
+            z-index: 1;
+        }
+
+        /* 풍성한 도트 나뭇잎/버섯 갓 (열매들이 매달릴 곳) */
+        .arcade-leaves {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 920px;
+            height: 460px;
+            background: #2ecc71; /* 마리오 초록색 파이프/나무 컬러 */
+            border-radius: 20px;
+            border: 6px solid #000;
+            box-shadow: inset 15px 15px 0px #58d68d, inset -20px -20px 0px #27ae60, 6px 6px 0px rgba(0,0,0,0.3);
+            z-index: 2;
+        }
+
+        /* 🍄 미스터리 물약 / 사과 아이템 노드 공통 디자인 */
+        .pixel-item {
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-decoration: none;
+            z-index: 3;
+            transition: all 0.15s steps(4); /* 고전 게임 프레임 느낌의 끊기는 듯한 애니메이션 효과 */
+            cursor: pointer;
+            border: 4px solid #000; /* 두꺼운 도트 아웃라인 */
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.3);
+        }
+
+        /* 아이템 내부 한글/영문 폰트 스타일링 */
+        .pixel-item .p-date {
+            font-size: 0.65rem;
+            font-weight: bold;
+            color: #ffffff;
+            margin-bottom: 4px;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        .pixel-item .p-num {
+            font-size: 1rem;
+            font-weight: bold;
+            color: #ffff00;
+            text-shadow: 2px 2px 0px #000;
+        }
+
+        /* 💬 마우스 올릴 때 상단에 펼쳐지는 도트 말풍선 */
+        .pixel-item::after {
+            content: attr(data-title);
+            position: absolute;
+            top: -55px;
+            left: 50%;
+            transform: translateX(-50%) scale(0);
+            background-color: #ffffff;
+            color: #000000;
+            padding: 8px 14px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            white-space: nowrap;
+            border: 3px solid #000;
+            box-shadow: 4px 4px 0px rgba(0,0,0,0.2);
+            opacity: 0;
+            transition: transform 0.1s ease, opacity 0.1s ease;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        /* 🔥 호버 이펙트: 마리오 점프하듯 위로 통 튀어오르기! */
+        .pixel-item:hover {
+            transform: scale(1.2) translateY(-15px);
+            box-shadow: 0px 10px 0px #000, 0px 15px 20px rgba(0,0,0,0.4);
+            z-index: 5;
+        }
+
+        .pixel-item:hover::after {
+            transform: translateX(-50%) scale(1);
+            opacity: 1;
+            top: -65px;
+        }
+
+        /* 🎨 고전 마리오 테마 아이템 컬러 스펙트럼 */
+        .red-apple     { background: #e74c3c; box-shadow: inset -6px -6px 0px #c0392b, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .orange-apple  { background: #e67e22; box-shadow: inset -6px -6px 0px #d35400, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .blue-potion   { background: #3498db; box-shadow: inset -6px -6px 0px #2980b9, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .grape-potion  { background: #9b59b6; box-shadow: inset -6px -6px 0px #8e44ad, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .peach-mush    { background: #ff7675; box-shadow: inset -6px -6px 0px #d63031, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .plum-mush     { background: #d63031; box-shadow: inset -6px -6px 0px #8a1414, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .lime-gem      { background: #2ecc71; box-shadow: inset -6px -6px 0px #27ae60, 4px 4px 0px rgba(0,0,0,0.3); } 
+        .gold-star     { background: #f1c40f; box-shadow: inset -6px -6px 0px #f39c12, 4px 4px 0px rgba(0,0,0,0.3); border-color: #fff #000 #000 #fff; } 
+
+        /* =======================================================
+           📌 아이템의 격자 배치 좌표 (X축 피치 조정)
+        ======================================================= */
+        .f1 { left: 140px; top: 110px; }
+        .f2 { left: 250px; top: 80px; }
+        .f3 { left: 360px; top: 120px; }
+        .f4 { left: 470px; top: 70px; }
+        .f5 { left: 580px; top: 110px; }
+        .f6 { left: 690px; top: 80px; }
+        .f7 { left: 800px; top: 130px; }
+        
+        .f8 { left: 170px; top: 210px; }
+        .f9 { left: 280px; top: 190px; }
+        .f10 { left: 390px; top: 220px; }
+        .f11 { left: 500px; top: 180px; }
+        .f12 { left: 610px; top: 210px; }
+        .f13 { left: 720px; top: 220px; }
+
+        .f14 { left: 120px; top: 310px; }
+        .f15 { left: 230px; top: 290px; }
+        .f16 { left: 340px; top: 320px; }
+        .f17 { left: 450px; top: 300px; }
+        .f18 { left: 560px; top: 330px; }
+        .f19 { left: 670px; top: 310px; }
+        .f20 { left: 780px; top: 310px; }
+
+        .f21 { left: 310px; top: 410px; }
+        .f22 { left: 430px; top: 400px; }
+        .f23 { left: 550px; top: 410px; }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>SUPER GOSAEKGO WORLD</h1>
+        <div class="score-board">
+            <div>MARIO<br><span>023400</span></div>
+            <div>COIN<br><span>🪙 x22</span></div>
+            <div>WORLD<br><em>1-1</em></div>
+            <div>TIME<br><span>365</span></div>
+        </div>
+    </header>
+
+    <div class="arcade-stage">
+        
+        <div class="arcade-trunk"></div>
+        
+        <div class="arcade-leaves"></div>
+
+        <div class="ground-floor"></div>
+
+        <a href="0310 1.html" class="pixel-item red-apple f1" data-title="주간 히트 노래 (스테픈 커리)">
+            <div class="p-date">03.10</div><div class="p-num">#01</div>
+        </a>
+        <a href="0310.html" class="pixel-item orange-apple f2" data-title="연애하는 방법 (Dynamic 고색고)">
+            <div class="p-date">03.10</div><div class="p-num">#02</div>
+        </a>
+        <a href="0310_1.html" class="pixel-item blue-potion f3" data-title="고색고 연습 페이지 (0310_1)">
+            <div class="p-date">03.10</div><div class="p-num">#03</div>
+        </a>
+        <a href="0310_2.html" class="pixel-item grape-potion f4" data-title="주간 히트 노래 2 (0310_2)">
+            <div class="p-date">03.10</div><div class="p-num">#04</div>
+        </a>
+        <a href="0317_1.html" class="pixel-item peach-mush f5" data-title="표 레이아웃 음악 보관소">
+            <div class="p-date">03.17</div><div class="p-num">#05</div>
+        </a>
+        <a href="0317_2.html" class="pixel-item plum-mush f6" data-title="회원가입 폼 및 비디오 실습">
+            <div class="p-date">03.17</div><div class="p-num">#06</div>
+        </a>
+        <a href="0317_3.html" class="pixel-item lime-gem f7" data-title="HTML5 개념 소개 div 레이아웃">
+            <div class="p-date">03.17</div><div class="p-num">#07</div>
+        </a>
+        <a href="0317_4.html" class="pixel-item red-apple f8" data-title="시맨틱 레이아웃 실습">
+            <div class="p-date">03.17</div><div class="p-num">#08</div>
+        </a>
+        <a href="0324_1.html" class="pixel-item orange-apple f9" data-title="CSS Float 기반 웹 블록">
+            <div class="p-date">03.24</div><div class="p-num">#09</div>
+        </a>
+        <a href="0324_2.html" class="pixel-item blue-potion f10" data-title="고색고 고급 CSS 선택자 실습">
+            <div class="p-date">03.24</div><div class="p-num">#10</div>
+        </a>
+        <a href="0324_3.html" class="pixel-item grape-potion f11" data-title="녹색산업지원센터 & 고색고 연혁">
+            <div class="p-date">03.24</div><div class="p-num">#11</div>
+        </a>
+        <a href="0331_1.html" class="pixel-item peach-mush f12" data-title="가상 선택자 (:hover, :focus)">
+            <div class="p-date">03.31</div><div class="p-num">#12</div>
+        </a>
+        <a href="0331_2.html" class="pixel-item plum-mush f13" data-title="자식 선택자 & nth-child 패턴">
+            <div class="p-date">03.31</div><div class="p-num">#13</div>
+        </a>
+        <a href="0331_3.html" class="pixel-item lime-gem f14" data-title="곡면 레이아웃 고색고등학교 메인">
+            <div class="p-date">03.31</div><div class="p-num">#14</div>
+        </a>
+        <a href="0407_1.html" class="pixel-item red-apple f15" data-title="Display 프로퍼티 개념">
+            <div class="p-date">04.07</div><div class="p-num">#15</div>
+        </a>
+        <a href="0407_2.html" class="pixel-item orange-apple f16" data-title="상대 배치 Relative Position">
+            <div class="p-date">04.07</div><div class="p-num">#16</div>
+        </a>
+        <a href="0407_3.html" class="pixel-item blue-potion f17" data-title="절대 배치 Absolute 구조">
+            <div class="p-date">04.07</div><div class="p-num">#17</div>
+        </a>
+        <a href="0407_4.html" class="pixel-item grape-potion f18" data-title="z-index 스페이드 카드 레이어">
+            <div class="p-date">04.07</div><div class="p-num">#18</div>
+        </a>
+        <a href="0407_5.html" class="pixel-item peach-mush f19" data-title="z-index 색상 블록 심화">
+            <div class="p-date">04.07</div><div class="p-num">#19</div>
+        </a>
+        <a href="0407_6.html" class="pixel-item plum-mush f20" data-title="@keyframes 무한 꽝! 애니메이션">
+            <div class="p-date">04.07</div><div class="p-num">#20</div>
+        </a>
+        <a href="0407_7.html" class="pixel-item lime-gem f21" data-title="무빙 질문있습니다 애니메이션">
+            <div class="p-date">04.07</div><div class="p-num">#21</div>
+        </a>
+        <a href="0512_1.html" class="pixel-item gold-star f22" data-title="Flexbox 기반 모던 프로필 페이지">
+            <div class="p-date">05.12</div><div class="p-num">#22</div>
+        </a>
+        <a href="#" class="pixel-item gold-star f23" data-title="다음 보너스 스테이지 진입">
+            <div class="p-date">NEXT</div><div class="p-num">#23</div>
+        </a>
+
+    </div>
+
+</body>
+</html>
