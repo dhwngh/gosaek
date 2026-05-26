@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+
+<style>
+    div {position: absolute;}
+
+    #red {
+        display: block;
+        position: absolute;
+        height: 100px;
+        width: 100px;
+        background-color: red;
+        z-index: -3;
+    }
+
+    #yellow {
+        display: block;
+        position: absolute;
+        height: 400px;
+        width: 400px;
+        background-color: yellow;
+        z-index: -3; left: 100px; top: 200px;
+    }
+
+    #green {
+        display: block;
+        position: absolute;
+        height: 100px;
+        width: 100px;
+        z-index: -2; left: 200px; top: 200px;
+        background-color: green;
+    }
+
+    #blue {
+        display: block;
+        position: absolute;
+        height: 100px;
+        width: 100px;
+        z-index: -2; left: 200px; top: 400px;
+        background-color: blue;
+    }
+</style>
+
+
+    <body>
+        <hr>
+        <div id="red"></div>
+
+        <div id="yellow"></div>
+        <div id="green"></div>
+        <div id="blue"></div>
+
+
+
+
+        
+    </body>
+
+</head>
