@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>주호's Portfolio</title>
+    <style>
+        /* 애플 스타일 초기화 및 기본 폰트 */
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Malgun Gothic", sans-serif; 
+            padding: 0 20px 60px 20px; 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background-color: #f5f5f7; /* 애플 특유의 연회색 배경 */
+            color: #1d1d1f; 
+            -webkit-font-smoothing: antialiased;
+        }
+        
+        /* [메인] 반투명 유리 효과 메뉴바 */
+        header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 50px; 
+            position: sticky; 
+            top: 0; 
+            background-color: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: saturate(180%) blur(20px); 
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            padding: 20px 0; 
+            z-index: 10; 
+        }
+        .title { font-size: 1.8rem; font-weight: 700; letter-spacing: -0.5px; }
+        .month-buttons { display: flex; gap: 10px; }
+        .month-btn { 
+            background: rgba(0, 0, 0, 0.05); 
+            color: #1d1d1f;
+            border: none; 
+            border-radius: 999px; 
+            padding: 10px 22px; 
+            font-size: 0.95rem;
+            font-weight: 600; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+        }
+        .month-btn:hover { background: #1d1d1f; color: #ffffff; transform: scale(1.05); }
+        
+        /* 섹션 타이틀 및 그리드 */
+        .section-container { margin-bottom: 80px; scroll-margin-top: 100px; }
+        .month-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 24px; letter-spacing: -0.5px; }
+        .grid-container { display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px; }
+        
+        /* 애플 스타일 카드 */
+        .card { 
+            background-color: #ffffff; 
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            cursor: pointer; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.04); 
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            overflow: hidden; 
+        }
+        .card:hover { transform: translateY(-8px); box-shadow: 0 12px 30px rgba(0,0,0,0.1); }
+        .card-image { height: 240px; overflow: hidden; background-color: #f4f4f4; }
+        .card-image img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .card:hover .card-image img { transform: scale(1.03); }
+        .card-info { padding: 20px; }
+        .card-info h3 { font-size: 1.1rem; margin-bottom: 6px; font-weight: 700; }
+        .card-info p { font-size: 0.9rem; color: #86868b; font-weight: 500; }
+
+        /* [상세 보기] 전용 애플 스타일 내비게이션 바 */
+        .sub-view-container { max-width: 1200px; margin: 0 auto; }
+        .sub-header { 
+            display: flex; 
+            align-items: center; 
+            position: sticky; 
+            top: 0; 
+            background-color: rgba(255, 255, 255, 0.7); 
+            backdrop-filter: saturate(180%) blur(20px); 
+            -webkit-backdrop-filter: saturate(180%) blur(20px);
+            padding: 15px 0; 
+            z-index: 10;
+            margin-bottom: 20px;
+        }
+        .back-btn { 
+            display: inline-flex; 
+            align-items: center;
+            gap: 8px;
+            text-decoration: none; 
+            color: #1d1d1f; 
+            background-color: #ffffff; 
+            border: 1px solid #d2d2d7; 
+            border-radius: 999px; 
+            padding: 10px 20px; 
+            font-size: 0.95rem;
+            font-weight: 600; 
+            cursor: pointer; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+            transition: all 0.2s ease; 
+        }
+        .back-btn:hover { background-color: #1d1d1f; color: #ffffff; transform: translateY(-1px); }
+        
+        /* 작품 링크 페이지가 꽉 차게 보일 창 */
+        .project-iframe { 
+            width: 100%; 
+            height: 82vh; 
+            border: none; 
+            border-radius: 24px; 
+            background-color: #fff; 
+            box-shadow: 0 20px 40px rgba(0,0,0,0.06);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="main-view">
+        <header>
+            <h1 class="title">주호's Portfolio</h1>
+            <div class="month-buttons">
+                <button class="month-btn" onclick="scrollToMonth('march')">3월 작품</button>
+                <button class="month-btn" onclick="scrollToMonth('april')">4월 작품</button>
+                <button class="month-btn" onclick="scrollToMonth('may')">5월 작품</button>
+            </div>
+        </header>
+
+        <div id="march" class="section-container">
+            <h2 class="month-title">3월 작품</h2>
+            <div class="grid-container">
+                <div class="card" onclick="openProject('project/0310 1.html')">
+                    <div class="card-image"><img src="img/img.1.jpg" alt="0310 1"></div>
+                    <div class="card-info"><h3>0310 1</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0310.html')">
+                    <div class="card-image"><img src="img/img.2.jpg" alt="0310"></div>
+                    <div class="card-info"><h3>0310</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0310_1.html')">
+                    <div class="card-image"><img src="img/img.3.jpg" alt="0310_1"></div>
+                    <div class="card-info"><h3>0310_1</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0310_2.html')">
+                    <div class="card-image"><img src="img/img.4.jpg" alt="0310_2"></div>
+                    <div class="card-info"><h3>0310_2</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0317_1.html')">
+                    <div class="card-image"><img src="img/img.5.jpg" alt="0317_1"></div>
+                    <div class="card-info"><h3>0317_1</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0317_2.html')">
+                    <div class="card-image"><img src="img/img.6.jpg" alt="0317_2"></div>
+                    <div class="card-info"><h3>0317_2</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0317_3.html')">
+                    <div class="card-image"><img src="img/img.7.jpg" alt="0317_3"></div>
+                    <div class="card-info"><h3>0317_3</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0317_4.html')">
+                    <div class="card-image"><img src="img/img.8.jpg" alt="0317_4"></div>
+                    <div class="card-info"><h3>0317_4</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0324_1.html')">
+                    <div class="card-image"><img src="img/img.9.jpg" alt="0324_1"></div>
+                    <div class="card-info"><h3>0324_1</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0324_2.html')">
+                    <div class="card-image"><img src="img/img.10.jpg" alt="0324_2"></div>
+                    <div class="card-info"><h3>0324_2</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0324_3.html')">
+                    <div class="card-image"><img src="img/img.11.jpg" alt="0324_3"></div>
+                    <div class="card-info"><h3>0324_3</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0331_1.html')">
+                    <div class="card-image"><img src="img/img.12.jpg" alt="0331_1"></div>
+                    <div class="card-info"><h3>0331_1</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0331_2.html')">
+                    <div class="card-image"><img src="img/img.13.jpg" alt="0331_2"></div>
+                    <div class="card-info"><h3>0331_2</h3><p>3월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0331_3.html')">
+                    <div class="card-image"><img src="img/img.14.jpg" alt="0331_3"></div>
+                    <div class="card-info"><h3>0331_3</h3><p>3월 작업물</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="april" class="section-container">
+            <h2 class="month-title">4월 작품</h2>
+            <div class="grid-container">
+                <div class="card" onclick="openProject('project/0407_1.html')">
+                    <div class="card-image"><img src="img/img.15.jpg" alt="0407_1"></div>
+                    <div class="card-info"><h3>0407_1</h3><p>4월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0407_2.html')">
+                    <div class="card-image"><img src="img/img.16.jpg" alt="0407_2"></div>
+                    <div class="card-info"><h3>0407_2</h3><p>4월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0407_3.html')">
+                    <div class="card-image"><img src="img/img.17.jpg" alt="0407_3"></div>
+                    <div class="card-info"><h3>0407_3</h3><p>4월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0407_4.html')">
+                    <div class="card-image"><img src="img/img.18.jpg" alt="0407_4"></div>
+                    <div class="card-info"><h3>0407_4</h3><p>4월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0407_5.html')">
+                    <div class="card-image"><img src="img/img.19.jpg" alt="0407_5"></div>
+                    <div class="card-info"><h3>0407_5</h3><p>4월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0407_6.html')">
+                    <div class="card-image"><img src="img/img.20.jpg" alt="0407_6"></div>
+                    <div class="card-info"><h3>0407_6</h3><p>4월 작업물</p></div>
+                </div>
+                <div class="card" onclick="openProject('project/0407_7.html')">
+                    <div class="card-image"><img src="img/img.21.jpg" alt="0407_7"></div>
+                    <div class="card-info"><h3>0407_7</h3><p>4월 작업물</p></div>
+                </div>
+            </div>
+        </div>
+
+        <div id="may" class="section-container">
+            <h2 class="month-title">5월 작품</h2>
+            <div class="grid-container">
+                <div class="card" onclick="openProject('project/0512_1.html')">
+                    <div class="card-image"><img src="img/img.22.jpg" alt="0512_1"></div>
+                    <div class="card-info"><h3>0512_1</h3><p>5월 작업물</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div id="sub-view" class="sub-view-container" style="display: none;">
+        <div class="sub-header">
+            <button class="back-btn" onclick="closeProject()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+                홈으로 돌아가기
+            </button>
+        </div>
+        <iframe id="project-frame" class="project-iframe" src=""></iframe>
+    </div>
+
+    <script>
+        // 월별 부드러운 스크롤
+        function scrollToMonth(id) {
+            const element = document.getElementById(id);
+            const headerOffset = 100;
+            const elementPosition = element.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            window.scrollTo({ top: offsetPosition, behavior: "smooth" });
+        }
+
+        // 박스 클릭 시: 링크 주소를 받아서 상세창을 띄웁니다
+        function openProject(url) {
+            document.getElementById('project-frame').src = url;
+            document.getElementById('main-view').style.display = 'none';
+            document.getElementById('sub-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+
+        // 홈으로 돌아가기 클릭 시: 메인 화면으로 복귀합니다
+        function closeProject() {
+            document.getElementById('project-frame').src = '';
+            document.getElementById('sub-view').style.display = 'none';
+            document.getElementById('main-view').style.display = 'block';
+            window.scrollTo(0, 0);
+        }
+    </script>
+</body>
+</html>
