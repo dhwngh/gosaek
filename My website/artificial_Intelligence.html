@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI 지식백과 - Academic Edition (Semantic Structure)</title>
+    <style>
+        /* ================= 백과사전 공통 디자인 시스템 ================= */
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        /* Flexbox를 사용하여 푸터를 항상 하단에 고정 */
+        body { 
+            font-family: 'Pretendard', "Malgun Gothic", "맑은 고딕", sans-serif; 
+            background-color: #f8f9fa; 
+            color: #333; 
+            line-height: 1.6; 
+            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+        
+        main { flex: 1; } /* 남은 공간을 모두 차지하도록 설정 */
+
+        a { text-decoration: none; color: inherit; cursor: pointer; }
+        ul, ol { list-style: none; }
+        button { cursor: pointer; font-family: inherit; transition: all 0.2s ease; border: none; }
+
+        .page-view { display: none; width: 100%; padding-bottom: 80px; }
+        .page-view.active { display: block; animation: fadeIn 0.3s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+        
+        /* 헤더 디자인: 네이버 지식백과 스타일 */
+        header { 
+            background-color: #ffffff; 
+            border-bottom: 2px solid #03c75a; 
+            padding: 20px 0; 
+            position: sticky; 
+            top: 0; 
+            z-index: 100; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        header .header-inner { display: flex; justify-content: space-between; align-items: flex-end; }
+        .logo { font-size: 26px; font-weight: 900; color: #03c75a; display: flex; align-items: center; gap: 6px; cursor: pointer; letter-spacing: -1px; }
+        .logo span { color: #222; font-weight: 800; font-size: 22px; }
+        .nav-menu { display: flex; gap: 30px; font-weight: 700; font-size: 16px; color: #555; margin-bottom: 3px; }
+        .nav-menu li:hover { color: #03c75a; cursor: pointer; }
+        .nav-menu li.active-menu { color: #03c75a; font-weight: 800; }
+
+        .section-title { font-size: 20px; font-weight: 800; color: #111; margin: 40px 0 15px 0; border-left: 4px solid #03c75a; padding-left: 12px; letter-spacing: -0.5px; }
+        
+        /* ================= 1. 메인 홈 대시보드 ================= */
+        .search-banner { background: #03c75a; padding: 50px 20px; text-align: center; }
+        .search-banner h2 { color: #fff; font-size: 28px; font-weight: 800; margin-bottom: 20px; letter-spacing: -1px; }
+        .main-search-wrapper { max-width: 650px; margin: 0 auto; display: flex; background: #fff; padding: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .main-search-wrapper input { flex: 1; border: none; outline: none; padding: 15px 20px; font-size: 16px; font-weight: 600; }
+        .main-search-btn { background: #03c75a; color: #fff; padding: 0 35px; font-weight: 800; font-size: 16px; border: 1px solid #02b350; }
+        .main-search-btn:hover { background: #02b350; }
+
+        /* 학습 진척도 바 */
+        .progress-card { background: #fff; padding: 25px 30px; border: 1px solid #e5e5e5; margin-top: 30px; }
+        .progress-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .progress-header span { font-weight: 700; color: #333; }
+        .progress-status { color: #03c75a; font-weight: 900; font-size: 18px; }
+        .progress-bar-container { width: 100%; height: 12px; background: #f0f0f0; border-radius: 2px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: #03c75a; width: 0%; transition: width 0.6s ease; }
+
+        .menu-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 20px; }
+        .menu-card { background: #fff; border: 1px solid #e5e5e5; padding: 30px; }
+        .menu-card h3 { font-size: 20px; font-weight: 800; color: #111; margin-bottom: 12px; }
+        .menu-card p { font-size: 15px; color: #666; margin-bottom: 25px; line-height: 1.6; word-break: keep-all; }
+        .menu-action-btns { display: flex; gap: 10px; }
+        .btn-primary { background: #03c75a; color: #fff; padding: 12px 15px; font-weight: 700; flex: 1; text-align: center; border: 1px solid #02b350; font-size: 15px; }
+        .btn-secondary { background: #fff; color: #333; border: 1px solid #ccc; padding: 12px 15px; font-weight: 700; flex: 1; text-align: center; font-size: 15px; }
+        .btn-primary:hover { background: #02b350; }
+        .btn-secondary:hover { background: #f0f0f0; }
+
+        /* ================= 2. 개념사전 목록 ================= */
+        .content-box { background: #fff; border: 1px solid #e5e5e5; margin-top: 30px; }
+        .content-header { padding: 25px 30px; border-bottom: 1px solid #e5e5e5; background: #fafafa; }
+        .content-header h1 { font-size: 24px; font-weight: 800; letter-spacing: -1px; }
+        .content-header p { font-size: 14px; color: #666; margin-top: 8px; }
+        
+        .concept-list { display: flex; flex-direction: column; }
+        .concept-item { padding: 25px 30px; border-bottom: 1px solid #f0f0f0; display: flex; flex-direction: column; gap: 8px; transition: background 0.2s;}
+        .concept-item:hover { background: #fcfcfc; }
+        .concept-item.viewed .concept-title { color: #888; text-decoration: none; }
+        .concept-item:last-child { border-bottom: none; }
+        .concept-title { font-size: 18px; font-weight: 800; color: #0000cc; cursor: pointer; text-decoration: none; display: inline-block; }
+        .concept-title:hover { text-decoration: underline; color: #0000ff; }
+        .concept-summary { font-size: 15px; color: #444; word-break: keep-all; }
+
+        /* ================= 3. 실전 트렌드 리포트 ================= */
+        .trend-magazine { display: flex; flex-direction: column; gap: 30px; margin-top: 30px; }
+        .magazine-card { background: #fff; border: 1px solid #e5e5e5; padding: 40px; border-top: 4px solid #111; }
+        .magazine-tag { display: inline-block; background: #111; color: #fff; padding: 4px 12px; font-size: 13px; font-weight: 800; margin-bottom: 15px; }
+        .magazine-card h2 { font-size: 24px; font-weight: 800; margin-bottom: 20px; border-bottom: 1px solid #e5e5e5; padding-bottom: 10px; }
+        
+        .magazine-content-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        @media (max-width: 768px) { .magazine-content-grid { grid-template-columns: 1fr; } }
+        .info-box { background: #fafafa; border: 1px solid #ddd; padding: 25px; }
+        .info-box h4 { font-size: 17px; font-weight: 800; color: #03c75a; margin-bottom: 10px; }
+        .info-box p { font-size: 15px; color: #444; }
+
+        /* 모달: 백과사전 상세 열람 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; justify-content: center; align-items: center; }
+        .modal-container { background: #fff; width: 90%; max-width: 850px; height: 85vh; border: 1px solid #03c75a; border-top: 5px solid #03c75a; display: flex; flex-direction: column; box-shadow: 0 10px 30px rgba(0,0,0,0.2); }
+        .modal-header { padding: 25px 35px; border-bottom: 1px solid #ddd; position: relative; }
+        .modal-close { position: absolute; top: 20px; right: 25px; font-size: 28px; color: #666; background: none; font-weight: 300; }
+        #modal-title { font-size: 28px; font-weight: 800; color: #111; letter-spacing: -1px; }
+        .modal-body { overflow-y: auto; padding: 35px; background: #fff; }
+
+        /* 백과사전 본문 스타일 */
+        .wiki-h2 { font-size: 20px; font-weight: 800; color: #111; margin: 30px 0 15px 0; border-bottom: 1px solid #ccc; padding-bottom: 8px; }
+        .wiki-p { font-size: 16px; color: #333; margin-bottom: 15px; text-align: justify; word-break: keep-all; line-height: 1.7; }
+        .wiki-p strong { color: #03c75a; font-weight: 800; }
+        .wiki-ul { list-style-type: square; padding-left: 20px; margin-bottom: 20px; }
+        .wiki-ul li { font-size: 15px; color: #333; margin-bottom: 8px; line-height: 1.6; }
+        .wiki-table { width: 100%; border-collapse: collapse; margin: 20px 0; border-top: 2px solid #666; }
+        .wiki-table th, .wiki-table td { border-bottom: 1px solid #ddd; padding: 12px; font-size: 14px; }
+        .wiki-table th { background: #f9f9f9; font-weight: 800; text-align: center; border-right: 1px solid #ddd;}
+        .wiki-table td { border-right: 1px solid #ddd; }
+        .wiki-table th:last-child, .wiki-table td:last-child { border-right: none; }
+        .wiki-quote { background: #f0fdf4; border-left: 4px solid #03c75a; padding: 15px 20px; color: #222; font-weight: 600; margin: 20px 0; font-size: 15px; }
+
+        /* ================= 4. 단일 문항(1-by-1) 퀴즈 시스템 ================= */
+        .quiz-intro-box { background: #fff; border: 1px solid #e5e5e5; padding: 50px; text-align: center; margin-top: 40px; }
+        .quiz-intro-box h2 { font-size: 24px; font-weight: 800; margin-bottom: 15px; }
+        .quiz-intro-box p { font-size: 16px; color: #666; margin-bottom: 30px; }
+        .quiz-start-btn { background: #03c75a; color: #fff; padding: 15px 40px; font-size: 18px; font-weight: 800; border-radius: 3px; }
+        .quiz-start-btn:hover { background: #02b350; }
+
+        .quiz-container { background: #fff; border: 1px solid #e5e5e5; margin-top: 30px; border-top: 4px solid #03c75a; display: none; }
+        .quiz-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 30px; border-bottom: 1px solid #eee; background: #fafafa; }
+        .quiz-progress-text { font-size: 16px; font-weight: 800; color: #03c75a; }
+        .quiz-exit-btn { font-size: 14px; color: #888; text-decoration: underline; background: none; }
+        
+        .quiz-body { padding: 50px 40px; }
+        .quiz-question-text { font-size: 22px; font-weight: 800; color: #111; margin-bottom: 30px; line-height: 1.5; word-break: keep-all; }
+        
+        .quiz-options { display: flex; flex-direction: column; gap: 12px; }
+        .quiz-option { padding: 18px 25px; background: #fff; border: 1px solid #ddd; font-size: 16px; color: #333; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 15px; transition: all 0.1s; }
+        .quiz-option:hover { background: #f9f9f9; border-color: #bbb; }
+        .quiz-option.selected { border: 2px solid #03c75a; background: #f0fdf4; color: #028a3f; font-weight: 800; }
+        .quiz-option.selected::before { content: '■'; color: #03c75a; font-size: 12px; }
+        
+        .quiz-footer { padding: 20px 40px 40px 40px; text-align: right; }
+        .quiz-next-btn { background: #111; color: #fff; padding: 15px 35px; font-size: 16px; font-weight: 800; border-radius: 2px; }
+        .quiz-next-btn:hover { background: #333; }
+
+        .quiz-result-container { background: #fff; border: 1px solid #e5e5e5; padding: 50px; text-align: center; margin-top: 30px; display: none; }
+        .score-display { font-size: 36px; font-weight: 900; color: #03c75a; margin-bottom: 10px; }
+        .score-desc { font-size: 16px; color: #666; margin-bottom: 40px; }
+        .wrong-item { background: #fafafa; border: 1px solid #eee; padding: 30px; margin-bottom: 20px; text-align: left; }
+        .wrong-item h4 { font-size: 17px; font-weight: 800; margin-bottom: 15px; color: #111; border-bottom: 1px dashed #ccc; padding-bottom: 10px;}
+        .wrong-item .user-ans { color: #d9534f; margin-bottom: 5px; font-weight: 600; font-size: 15px; }
+        .wrong-item .correct-ans { color: #02b350; font-weight: 800; margin-bottom: 15px; font-size: 15px; }
+        .wrong-item .explanation { background: #fff; border: 1px solid #ddd; padding: 15px; font-size: 14px; color: #444; line-height: 1.6; border-left: 3px solid #666; }
+
+        /* ================= 5. 푸터 (Footer) 디자인 ================= */
+        footer {
+            background-color: #ebedef;
+            border-top: 1px solid #d4d8db;
+            padding: 40px 0;
+            text-align: center;
+            color: #555;
+            font-size: 14px;
+        }
+        .footer-links { margin-bottom: 15px; font-weight: 700; }
+        .footer-links span { cursor: pointer; margin: 0 15px; transition: color 0.2s; }
+        .footer-links span:hover { color: #03c75a; }
+        .copyright { font-size: 13px; color: #888; margin-bottom: 15px;}
+        
+        /* 추가된 문구 스타일 */
+        .project-credit {
+            font-size: 16px;
+            font-weight: 800;
+            color: #03c75a;
+            margin-top: 10px;
+            letter-spacing: -0.5px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-inner">
+            <div class="logo" onclick="switchPage('page-main')">AI<span>지식백과</span> <span style="font-size:14px; color:#888; font-weight:600; margin-left:10px; border-left:1px solid #ccc; padding-left:10px;">AI Academic</span></div>
+            <nav>
+                <ul class="nav-menu">
+                    <li id="menu-main" class="active-menu" onclick="switchPage('page-main')">홈</li>
+                    <li id="menu-concept" onclick="switchPage('page-concept')">표제어 검색</li>
+                    <li id="menu-trend" onclick="switchPage('page-trend')">트렌드 리포트</li>
+                    <li id="menu-quiz-intro" onclick="switchPage('page-quiz-intro')">학습 평가 (퀴즈)</li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="page-main" class="page-view active">
+            <div class="search-banner">
+                <h2>인공지능 핵심 표제어 통합 검색</h2>
+                <div class="main-search-wrapper">
+                    <input type="text" id="mainSearchInput" placeholder="검색어를 입력하십시오. (예: 딥러닝, 머신러닝, LLM)" onkeypress="if(event.key==='Enter') executeSearch()">
+                    <button class="main-search-btn" onclick="executeSearch()">검색</button>
+                </div>
+            </div>
+            <div class="container">
+                <div class="progress-card">
+                    <div class="progress-header">
+                        <span>핵심 표제어 열람 달성률 (총 12개)</span>
+                        <span class="progress-status" id="progress-text">0% 완료</span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+
+                <div class="section-title">주요 탐색 영역</div>
+                <div class="menu-grid">
+                    <div class="menu-card">
+                        <h3>인공지능 개념사전 열람</h3>
+                        <p>인공지능의 뼈대를 이루는 12가지 핵심 기술과 수학적 원리를 학술 서적 수준으로 상세히 수록한 백과사전입니다.</p>
+                        <div class="menu-action-btns">
+                            <button class="btn-primary" onclick="switchPage('page-concept')">표제어 목록 보기</button>
+                        </div>
+                    </div>
+                    <div class="menu-card">
+                        <h3>최신 트렌드 리포트</h3>
+                        <p>LLM, RAG 등 현업에서 가장 주목받는 기술 동향을 심도 있게 분석한 매거진 형태의 리포트입니다.</p>
+                        <div class="menu-action-btns">
+                            <button class="btn-primary" onclick="switchPage('page-trend')">리포트 열람하기</button>
+                        </div>
+                    </div>
+                    <div class="menu-card" style="grid-column: span 2;">
+                        <h3>실전 지식 평가 (단일 문항)</h3>
+                        <p>학습한 지식을 점검하기 위한 평가 시스템입니다. 한 화면에 한 문항씩 제시되어 집중력을 높입니다.</p>
+                        <div class="menu-action-btns">
+                            <button class="btn-secondary" onclick="prepareQuiz('concept')">개념 평가 응시</button>
+                            <button class="btn-secondary" onclick="prepareQuiz('trend')">트렌드 평가 응시</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-concept" class="page-view">
+            <div class="container">
+                <div class="content-box">
+                    <div class="content-header">
+                        <h1>표제어 전체 목록</h1>
+                        <p>원하시는 표제어를 클릭하시면 상세 학술 정보를 열람하실 수 있습니다.</p>
+                    </div>
+                    <div class="concept-list" id="conceptListContainer">
+                        </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-trend" class="page-view">
+            <div class="container">
+                <div class="trend-magazine">
+                    <div class="content-box" style="margin-top:0; border-bottom:none;">
+                        <div class="content-header">
+                            <h1>2026 Global AI 트렌드 분석</h1>
+                            <p>생성형 AI가 주도하는 기술 혁명의 핵심을 보기 쉽게 요약했습니다.</p>
+                        </div>
+                    </div>
+
+                    <div class="magazine-card">
+                        <span class="magazine-tag">LLM 파이프라인</span>
+                        <h2>거대 언어 모델의 3단계 탄생 과정</h2>
+                        <div class="magazine-content-grid">
+                            <div class="info-box">
+                                <h4>1. 비지도 사전학습 (Pre-training)</h4>
+                                <p>수조 개의 웹 문장을 통해 언어의 구조와 세상의 지식을 통계적으로 체득하는 근본 단계입니다. 이 단계의 모델은 단순히 다음 단어를 잘 맞추는 것에 특화되어 있습니다.</p>
+                            </div>
+                            <div class="info-box">
+                                <h4>2. 지도 미세조정 (SFT)</h4>
+                                <p>단순 예측 기계였던 AI에게 고품질의 "질문-답변" 쌍 데이터를 교육하여, 사람의 지시를 따르는 유용한 대화 상대로 가다듬는 단계입니다.</p>
+                            </div>
+                            <div class="info-box" style="grid-column: span 2;">
+                                <h4>3. 인간 피드백 기반 강화학습 (RLHF)</h4>
+                                <p>인간 검수자가 모델의 답변에 점수를 매겨 피드백을 주고, 이를 바탕으로 모델이 윤리적이고 안전하며 거부감 없는 답변을 생성하도록 정렬(Alignment)하는 고도화 과정입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="magazine-card">
+                        <span class="magazine-tag">실전 트렌드</span>
+                        <h2>글로벌 4대 핵심 기술 동향</h2>
+                        <div class="magazine-content-grid">
+                            <div class="info-box">
+                                <h4>RAG (검색 증강 생성)</h4>
+                                <p>외부 문서를 실시간으로 검색해 답변을 생성함으로써, LLM의 가장 큰 약점인 환각(Hallucination) 현상을 방지하고 팩트 기반의 응답을 보장합니다.</p>
+                            </div>
+                            <div class="info-box">
+                                <h4>멀티모달 (Multimodal)</h4>
+                                <p>글자뿐만 아니라 이미지, 음성, 비디오 등 다양한 형태의 데이터를 동시에 이해하고 생성할 수 있는, 인간과 유사한 형태의 통합 지능입니다.</p>
+                            </div>
+                            <div class="info-box">
+                                <h4>온디바이스 AI (On-device AI)</h4>
+                                <p>무거운 클라우드 서버 연결 없이 스마트폰, PC 등 기기 자체의 NPU 칩에서 직접 AI가 구동되어 개인정보 보호와 오프라인 작업이 가능한 기술입니다.</p>
+                            </div>
+                            <div class="info-box">
+                                <h4>자율형 AI 에이전트</h4>
+                                <p>단순히 질문에 답하는 챗봇을 넘어, 사용자의 목표를 이해하고 스스로 계획을 수립하며 외부 툴(웹 검색, 코드 실행 등)을 사용해 업무를 완수하는 비서입니다.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-quiz-intro" class="page-view">
+            <div class="container">
+                <div class="quiz-intro-box">
+                    <h2>AI 지식백과 종합 평가 시스템</h2>
+                    <p>본 평가는 학습자의 지식 수준을 점검하기 위해 제공됩니다.<br>문항은 직렬형(1-by-1)으로 제시되며, 이전 문항으로 돌아갈 수 없습니다.</p>
+                    <div style="display:flex; justify-content:center; gap:15px; margin-top:20px;">
+                        <button class="quiz-start-btn" onclick="prepareQuiz('concept')">개념 종합 평가 시작</button>
+                        <button class="quiz-start-btn" style="background:#555;" onclick="prepareQuiz('trend')">최신 트렌드 평가 시작</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="page-quiz-active" class="page-view">
+            <div class="container">
+                <div class="quiz-container" id="quizActiveContainer">
+                    <div class="quiz-header">
+                        <span class="quiz-progress-text" id="quizProgressText">문항 1 / 6</span>
+                        <button class="quiz-exit-btn" onclick="exitQuiz()">평가 종료 (나가기)</button>
+                    </div>
+                    <div class="quiz-body">
+                        <div class="quiz-question-text" id="quizQuestionText">질문 텍스트</div>
+                        <div class="quiz-options" id="quizOptionsContainer">
+                            </div>
+                    </div>
+                    <div class="quiz-footer">
+                        <button class="quiz-next-btn" id="quizNextBtn" onclick="handleNextQuestion()">다음 문항으로</button>
+                    </div>
+                </div>
+
+                <div class="quiz-result-container" id="quizResultContainer">
+                    <div class="score-display" id="resultScoreText">0 / 6 정답</div>
+                    <div class="score-desc">학습 평가가 완료되었습니다. 하단에서 오답 해설을 확인하십시오.</div>
+                    <div id="resultWrongAnswers" style="text-align:left;"></div>
+                    <button class="btn-primary" style="margin-top:30px; padding:15px 40px; font-size:16px;" onclick="switchPage('page-quiz-intro')">평가 센터로 돌아가기</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-links">
+                <span></span> 
+                <span style="color:#03c75a;"></span>  
+                <span></span> 
+                <span></span>
+            </div>
+            <p class="copyright">© 2026 JUHO Corp. & AI Academic Encyclopedia. All rights reserved.</p>
+            <p class="project-credit">20914 오주호 마지막 프로젝트 산출물</p>
+        </div>
+    </footer>
+
+    <div id="conceptModal" class="modal-overlay">
+        <div class="modal-container">
+            <div class="modal-header">
+                <h2 id="modal-title">표제어 제목</h2>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body" id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+        const aiConceptsRaw = [
+            { 
+                title: "인공지능 (Artificial Intelligence, AI)", 
+                summary: "인간의 지적 능력을 기계적으로 모방하고 구현하는 컴퓨터 과학의 최상위 학문.",
+                detail: `
+                    <div class="wiki-h2">1. 개요 및 정의</div>
+                    <div class="wiki-p"><strong>인공지능(Artificial Intelligence)</strong>이란 인간의 인지, 추론, 학습, 지각 능력을 컴퓨터 시스템이 수행할 수 있도록 연구하는 학문이다. 계산기와 같은 단순한 연산 기계를 넘어, 주어진 상황을 인식하고 목적 달성을 위해 자율적으로 판단하는 모든 기술 체계를 포괄한다. '인공지능'이라는 용어는 1956년 존 매카시가 주도한 다트머스 회의(Dartmouth Conference)에서 처음 학술적으로 제안되었다.</div>
+                    
+                    <div class="wiki-h2">2. 패러다임의 역사적 변천사</div>
+                    <ul class="wiki-ul">
+                        <li><strong>기호주의 (Symbolic AI)와 전문가 시스템:</strong> 초기 AI 학자들은 인간의 지능이 논리적 기호 조작으로 이루어진다고 믿었다. 프로그래머가 'If-Then' 형태의 명시적 규칙을 무수히 입력하여 기계를 똑똑하게 만들려 했으나, 인간의 직관과 모호성을 규칙으로 표현하는 데 한계를 느끼고 첫 번째 AI의 겨울을 맞이한다.</li>
+                        <li><strong>연결주의 (Connectionism)의 부활:</strong> 인간의 논리보다는 뇌의 물리적 구조(뉴런 네트워크)를 모방하려는 시도다. 과거에는 컴퓨팅 파워 부족으로 외면받았으나, 2000년대 이후 GPU의 발전과 빅데이터의 폭발적 증가로 인공신경망이 부활하며 현재의 딥러닝 시대를 열었다.</li>
+                    </ul>
+
+                    <div class="wiki-h2">3. 모라벡의 역설 (Moravec's Paradox)</div>
+                    <div class="wiki-quote">"인간에게 쉬운 것은 컴퓨터에게 어렵고, 컴퓨터에게 쉬운 것은 인간에게 어렵다." - 한스 모라벡 (1980년대)</div>
+                    <div class="wiki-p">인공지능 분야의 고전적인 역설이다. 고도의 논리적 추론이나 체스/바둑 같은 복잡한 연산은 컴퓨터가 인간을 쉽게 뛰어넘지만, 오히려 한 살짜리 아기도 할 수 있는 시각 인식, 얼굴 알아보기, 직립 보행 등 진화적으로 오래된 감각/운동 능력은 기계로 구현하기가 극도로 어렵다는 현상을 뜻한다.</div>
+
+                    <div class="wiki-h2">4. 강인공지능과 약인공지능</div>
+                    <table class="wiki-table">
+                        <tr><th>분류</th><th>설명</th><th>특징</th></tr>
+                        <tr><td>약인공지능 (ANI)</td><td>특정하게 정의된 좁은 도메인의 작업만을 수행할 수 있는 AI.</td><td>자아, 의식, 감정이 없으며 현재 인류가 개발한 모든 AI(알파고, 챗GPT 등)가 여기에 속한다.</td></tr>
+                        <tr><td>강인공지능 (AGI)</td><td>인간과 동일하거나 그 이상의 보편적 지능(General Intelligence)을 가진 AI.</td><td>새로운 상황에 직면해도 스스로 학습하여 문제를 해결한다. 아직 이론적 목표 단계에 있다.</td></tr>
+                    </table>`
+            },
+            { 
+                title: "머신러닝 (Machine Learning, ML)", 
+                summary: "명시적으로 프로그래밍하지 않고도 데이터를 통해 기계가 스스로 규칙을 찾는 기술.",
+                detail: `
+                    <div class="wiki-h2">1. 패러다임의 혁신적 전환</div>
+                    <div class="wiki-p"><strong>머신러닝(기계학습)</strong>은 인공지능을 달성하기 위한 구체적 방법론이다. 전통적인 프로그래밍 패러다임이 <strong>'데이터 + 규칙(코드) = 결과'</strong>였다면, 머신러닝의 패러다임은 <strong>'데이터 + 결과(정답) = 규칙'</strong>이다. 즉, 기계에게 대량의 데이터와 정답을 던져주면, 수학적 알고리즘을 통해 둘 사이의 패턴과 상관관계를 스스로 찾아내어 모델링한다.</div>
+                    
+                    <div class="wiki-h2">2. 머신러닝의 3대 학습 알고리즘</div>
+                    <ul class="wiki-ul">
+                        <li><strong>지도학습 (Supervised Learning):</strong> 가장 보편적인 방식. 입력 데이터(X)와 함께 명확한 정답 라벨(Y)을 제공하여 학습시킨다. (사례: 이메일 스팸 분류기, 질병 진단)</li>
+                        <li><strong>비지도학습 (Unsupervised Learning):</strong> 정답 라벨이 없는 데이터만을 제공한다. 기계가 데이터의 밀도, 거리 등을 계산하여 스스로 숨겨진 구조와 군집(Cluster)을 찾아낸다. (사례: 고객 세분화 마케팅)</li>
+                        <li><strong>강화학습 (Reinforcement Learning):</strong> 정답을 주지 않고, 기계(Agent)가 특정 환경 내에서 행동을 취했을 때 주어지는 보상이나 벌칙을 통해 최적의 정책을 깨우치는 방식이다. (사례: 알파고, 자율주행)</li>
+                    </ul>
+
+                    <div class="wiki-h2">3. 핵심 딜레마: 편향-분산 트레이드오프 (Bias-Variance Tradeoff)</div>
+                    <ul class="wiki-ul">
+                        <li><strong>과소적합 (Underfitting):</strong> 모델이 너무 단순하여 훈련 데이터의 패턴조차 제대로 학습하지 못한 상태.</li>
+                        <li><strong>과대적합 (Overfitting):</strong> 모델이 너무 복잡하여 훈련 데이터에만 완벽하게 맞춰진(암기한) 상태. 훈련 시에는 100점이지만, 처음 보는 실제 데이터가 들어오면 예측력이 곤두박질친다.</li>
+                    </ul>`
+            },
+            { 
+                title: "딥러닝 (Deep Learning, DL)", 
+                summary: "수많은 은닉층을 가진 인공신경망을 활용해 복잡한 비정형 데이터를 처리하는 고도화된 머신러닝 기법.",
+                detail: `
+                    <div class="wiki-h2">1. 개요와 기술적 도약</div>
+                    <div class="wiki-p"><strong>딥러닝(Deep Learning)</strong>은 머신러닝의 하위 분야로, 인간의 뇌 신경망 구조에서 영감을 받은 인공신경망(Artificial Neural Network)을 수십, 수백 개의 층(Layer)으로 깊게(Deep) 쌓아 올려 복잡한 비선형 문제를 해결하는 기술이다. 2012년 이미지넷 경진대회에서 'AlexNet' 모델이 압도적인 1위를 차지하며 전 세계적인 AI 혁명을 촉발했다.</div>
+                    
+                    <div class="wiki-h2">2. 머신러닝과의 결정적 차이: 특징 학습 (Feature Representation Learning)</div>
+                    <div class="wiki-p">가장 중요한 기술적 차이는 데이터의 <strong>'특징(Feature)을 누가 추출하느냐'</strong>이다. 전통적인 머신러닝에서는 도메인 전문가가 특징을 일일이 수치화해야 했다. 반면 딥러닝은 원본 데이터(Raw Image, Audio)를 그대로 입력하면 <strong>수많은 신경망 층을 거치며 기계가 스스로 중요한 특징을 계층적으로 추출</strong>한다. 예를 들어 얕은 층에서는 '선과 모서리'를, 깊은 층에서는 '얼굴 전체'를 인식하는 방식이다.</div>
+
+                    <div class="wiki-h2">3. 딥러닝을 위한 필수 구성 요소</div>
+                    <ul class="wiki-ul">
+                        <li><strong>활성화 함수 (Activation Function):</strong> 단순히 들어온 신호를 더하는 것이 아니라, 다음 뉴런으로 신호를 보낼지 말지를 결정하는 비선형 함수다. (ReLU, Sigmoid 등)</li>
+                        <li><strong>하드웨어 가속 (GPU/TPU):</strong> 수백만 개의 가중치 매개변수를 병렬로 연산하기 위해 GPU 연산이 필수적이다.</li>
+                    </ul>`
+            },
+            { 
+                title: "인공신경망 (Artificial Neural Network, ANN)", 
+                summary: "인간 뇌의 뉴런 연결 구조를 수학적으로 모사하여 패턴을 인식하는 딥러닝의 기본 아키텍처.",
+                detail: `
+                    <div class="wiki-h2">1. 신경망의 최소 단위: 퍼셉트론 (Perceptron)</div>
+                    <div class="wiki-p">인공신경망은 생물학적 뉴런의 작동 방식을 수학적으로 모방한다. 뉴런의 역할을 하는 <strong>노드(Node)</strong>들은 서로 연결되어 있으며, 각 연결선에는 신호의 중요도를 나타내는 <strong>가중치(Weight)</strong>가 존재한다. 입력값에 가중치를 곱하고 <strong>편향(Bias)</strong>을 더한 뒤, 활성화 함수를 통과시켜 다음 노드로 신호를 전달한다.</div>
+                    
+                    <div class="wiki-h2">2. 다층 퍼셉트론 (Multi-Layer Perceptron, MLP)의 구조</div>
+                    <ul class="wiki-ul">
+                        <li><strong>입력층 (Input Layer):</strong> 외부 데이터가 처음 들어오는 관문.</li>
+                        <li><strong>은닉층 (Hidden Layer):</strong> 입력층과 출력층 사이에서 데이터를 변환하고 복잡한 특징을 추출하는 층. 이 은닉층이 2개 이상일 때 <strong>'Deep' Learning</strong>이라고 부른다.</li>
+                        <li><strong>출력층 (Output Layer):</strong> 최종 예측 결과를 반환한다.</li>
+                    </ul>
+
+                    <div class="wiki-h2">3. 핵심 학습 원리: 오차 역전파 (Backpropagation)와 연쇄 법칙</div>
+                    <div class="wiki-p">신경망이 똑똑해지는 핵심 알고리즘이다.</div>
+                    <ul class="wiki-ul">
+                        <li><strong>순전파 (Forward Propagation):</strong> 데이터가 입력층에서 출력층 방향으로 흘러가 예측값을 만든다.</li>
+                        <li><strong>오차 역전파 (Backpropagation):</strong> 오차를 최소화하기 위해, 출력층에서부터 다시 입력층으로 <strong>'거꾸로'</strong> 이동하며 각 가중치가 오차에 얼마나 기여했는지 연쇄 법칙을 통해 계산하고 가중치를 업데이트한다.</li>
+                    </ul>`
+            },
+            { 
+                title: "자연어 처리 (Natural Language Processing, NLP)", 
+                summary: "인간의 일상적인 언어(텍스트 및 음성)를 컴퓨터가 수학적으로 해석하고 조작하는 기법.",
+                detail: `
+                    <div class="wiki-h2">1. 개요 및 도전 과제</div>
+                    <div class="wiki-p">자연어 처리는 불규칙하고 문맥에 따라 의미가 변하는 인간의 언어를 컴퓨터가 인식할 수 있는 수학적 형태로 변환하고 해석하는 학문이다. 번역, 감성 분석, 챗봇, 요약 등 AI 서비스의 핵심 인테페이스 역할을 한다.</div>
+                    
+                    <div class="wiki-h2">2. NLP의 핵심 파이프라인</div>
+                    <table class="wiki-table">
+                        <tr><th>단계</th><th>핵심 작업</th><th>설명</th></tr>
+                        <tr><td>형태소 분석 및 정제</td><td>Cleaning</td><td>특수문자 제거, 띄어쓰기 교정 등 언어학적 기초 공사.</td></tr>
+                        <tr><td>토큰화</td><td>Tokenization</td><td>긴 문장을 처리 가능한 최소 의미 단위(토큰)로 쪼갠다.</td></tr>
+                        <tr><td>워드 임베딩</td><td>Word Embedding</td><td>단어를 고차원 공간의 <strong>실수 벡터(좌표)</strong>로 변환하여 단어 간 유사도를 수학적으로 연산할 수 있게 만든다.</td></tr>
+                    </table>
+
+                    <div class="wiki-h2">3. 처리 아키텍처의 진화 역사</div>
+                    <div class="wiki-p">과거에는 단어를 순서대로 읽는 <strong>RNN/LSTM</strong> 모델이 지배적이었으나 긴 문장의 문맥을 잊는 한계가 있었다. 현재는 문맥의 중요 단어에만 집중하는 <strong>어텐션(Attention)</strong> 메커니즘만으로 구성된 <strong>트랜스포머(Transformer)</strong> 아키텍처가 전 세계 표준으로 자리 잡았다.</div>`
+            },
+            { 
+                title: "거대 언어 모델 (Large Language Model, LLM)", 
+                summary: "초거대 규모의 신경망 파라미터와 방대한 텍스트 데이터를 통계적으로 학습한 최첨단 텍스트 엔진.",
+                detail: `
+                    <div class="wiki-h2">1. LLM의 본질과 통계적 언어 모델</div>
+                    <div class="wiki-p"><strong>LLM(거대 언어 모델)</strong>은 OpenAI의 GPT, 구글의 Gemini와 같이 수백억에서 수조 개의 매개변수(Parameter)를 가진 초거대 모델이다. 이 모델들의 본질적인 목표는 <strong>"지금까지 주어진 텍스트 문맥을 바탕으로 가장 자연스럽고 확률이 높은 '다음 단어(토큰)'를 추론해내는 것"</strong>이다. 수조 번의 훈련을 통해 통계적 분포를 체득한 결과, 사람과 완벽하게 대화하는 것처럼 보이게 된다.</div>
+                    
+                    <div class="wiki-h2">2. 스케일링 법칙 (Scaling Law)과 창발성 (Emergent Abilities)</div>
+                    <div class="wiki-p">연구자들은 모델의 크기, 데이터 양, 컴퓨팅 파워를 늘릴수록 성능이 예측 가능하게 상승한다는 <strong>스케일링 법칙</strong>을 발견했다. 더욱 놀라운 것은 모델의 크기가 특정 임계치를 넘어가면 예측 불가능한 능력(코딩, 논리 퍼즐 등)이 갑자기 발현되는 <strong>'창발성'</strong> 현상이다.</div>
+
+                    <div class="wiki-h2">3. 핵심 한계: 컨텍스트 윈도우와 환각 (Hallucination)</div>
+                    <ul class="wiki-ul">
+                        <li><strong>컨텍스트 윈도우 (Context Window):</strong> 모델이 한 번에 기억하고 연산할 수 있는 단어의 최대 한계량.</li>
+                        <li><strong>환각 (Hallucination):</strong> LLM은 진실 기반의 데이터베이스가 아니라 확률적 기계이므로, 존재하지 않는 사실을 그럴싸하게 지어내는 치명적인 한계가 있다.</li>
+                    </ul>`
+            },
+            { 
+                title: "생성형 AI (Generative AI)", 
+                summary: "데이터의 판별을 넘어 세상에 존재하지 않던 새로운 텍스트, 이미지, 음성 등의 콘텐츠를 합성해내는 기술.",
+                detail: `
+                    <div class="wiki-h2">1. 판별에서 창조로의 도약</div>
+                    <div class="wiki-p">기존 인공지능이 주어진 데이터를 분류하는 <strong>판별 모델</strong>이었다면, <strong>생성 모델</strong>은 데이터들의 확률 분포 자체를 학습하여 조건에 맞는 새로운 데이터를 만들어낸다. 이는 기계가 '창작물 생성'에 개입하기 시작했음을 의미한다.</div>
+                    
+                    <div class="wiki-h2">2. 핵심 생성 아키텍처</div>
+                    <ul class="wiki-ul">
+                        <li><strong>디퓨전 모델 (Diffusion Models):</strong> 현재 최고성능 이미지 생성 AI(미드저니 등)의 핵심 원리. 원본 이미지에 노이즈를 추가하는 과정을 학습한 뒤, 역으로 <strong>완전한 노이즈 상태에서 잡음을 걷어내며(Denoising) 텍스트 조건에 맞는 새로운 고해상도 이미지를 조각해 내는 방식</strong>이다.</li>
+                        <li><strong>GAN (생성적 적대 신경망):</strong> 진짜 같은 가짜를 만드는 생성자(Generator)와 이를 감별하는 판별자(Discriminator)가 서로 경쟁하며 사실적인 데이터를 생성한다.</li>
+                    </ul>`
+            },
+            { 
+                title: "트랜스포머 아키텍처 (Transformer Architecture)", 
+                summary: "셀프 어텐션(Self-Attention) 메커니즘을 적용하여 현대 딥러닝 혁신을 이끈 구글의 기념비적 알고리즘.",
+                detail: `
+                    <div class="wiki-h2">1. 혁명적 논문의 등장</div>
+                    <div class="wiki-p">2017년 구글 연구진이 발표한 <strong>"Attention Is All You Need"</strong> 논문에서 제안되었다. 기존 RNN을 폐기하고 오직 '어텐션(Attention)' 메커니즘만으로 구성된 모델을 제안하여 AI 역사를 바꿨다. GPT의 'T'가 바로 이것이다.</div>
+                    
+                    <div class="wiki-h2">2. 핵심 기술 1: 셀프 어텐션 (Self-Attention)과 QKV</div>
+                    <div class="wiki-p">문장 내 단어들이 서로 어떤 연관성을 가지는지 스스로 가중치를 계산하는 메커니즘. 단어를 순서대로 읽지 않고 한 번에 통째로 읽어 연산한다.</div>
+                    <ul class="wiki-ul">
+                        <li><strong>Query (질의):</strong> 현재 내가 집중하고 부각시키고 싶은 기준 단어.</li>
+                        <li><strong>Key (키):</strong> 문장 내 다른 단어들의 특성.</li>
+                        <li><strong>Value (값):</strong> 문장 내 다른 단어들의 실제 의미값.</li>
+                    </ul>
+                    <div class="wiki-p">Query와 Key의 내적을 통해 유사도를 구하고, 이 비중에 따라 Value를 합산하여 최종 문맥을 파악한다.</div>
+
+                    <div class="wiki-h2">3. 핵심 기술 2: 위치 인코딩 (Positional Encoding)</div>
+                    <div class="wiki-p">병렬 입력으로 잃어버린 단어의 순서(어순) 정보를 보완하기 위해, 사인과 코사인 함수를 이용해 <strong>단어의 위치 정보를 담은 수학적 꼬리표</strong>를 더해주는 방식을 도입했다.</div>`
+            },
+            { 
+                title: "RAG (검색 증강 생성, Retrieval-Augmented Generation)", 
+                summary: "대형 언어 모델의 '환각 현상'을 억제하고 신뢰도 높은 답변을 생성하기 위해 외부 정보 검색 기술을 결합한 프레임워크.",
+                detail: `
+                    <div class="wiki-h2">1. 도입 배경: 환각 방어</div>
+                    <div class="wiki-p">기업의 사내 규정이나 최신 뉴스를 묻는 질문에 AI가 엉뚱한 답변(환각)을 하지 못하게 하려면, AI에게 자신의 내부 지식에 의존하지 말고 <strong>외부의 '신뢰할 수 있는 문서 리스트'를 먼저 읽고 답변하도록 강제</strong>해야 한다. 이를 RAG 기술이라 한다.</div>
+                    
+                    <div class="wiki-h2">2. RAG의 핵심 파이프라인</div>
+                    <ol class="wiki-ul">
+                        <li><strong>데이터 저장:</strong> 사내 문서를 잘게 쪼갠 후, 텍스트를 숫자 벡터로 변환하여 <strong>벡터 데이터베이스(Vector DB)</strong>에 저장한다.</li>
+                        <li><strong>검색 (Retrieval):</strong> 사용자의 질문 벡터와 가장 거리가 가까운(유사도가 높은) 관련 문서 덩어리를 검색해 가져온다.</li>
+                        <li><strong>증강 및 생성 (Augmentation & Generation):</strong> 검색된 원본 문서를 사용자의 프롬프트에 덧붙여 LLM에 전달하면, LLM이 문서를 독해하여 최종 답변과 출처를 제공한다.</li>
+                    </ol>`
+            },
+            { 
+                title: "데이터 전처리 (Data Preprocessing)", 
+                summary: "AI 모델이 올바르게 학습할 수 있도록 원시 데이터를 정제하고 변환하는 필수 공정.",
+                detail: `
+                    <div class="wiki-h2">1. 데이터 전처리의 중요성</div>
+                    <div class="wiki-quote">"Garbage In, Garbage Out (쓰레기를 넣으면 쓰레기가 나온다)"</div>
+                    <div class="wiki-p">AI 분야의 불문율이다. 훈련 데이터에 오류가 많거나 편향되어 있다면 모델의 결과물은 처참해진다. 실무에서 데이터 과학자가 쏟는 시간의 80% 이상이 데이터 수집과 전처리에 소요된다.</div>
+                    
+                    <div class="wiki-h2">2. 핵심 전처리 기법</div>
+                    <ul class="wiki-ul">
+                        <li><strong>결측치/이상치 처리:</strong> 값이 비어있거나 극단적으로 비정상적인 값을 대체하거나 삭제한다.</li>
+                        <li><strong>스케일링(Scaling):</strong> 변수 간 값의 크기 차이가 심하면 학습이 되지 않으므로 모든 숫자의 범위를 일정하게 압축한다.</li>
+                        <li><strong>원-핫 인코딩(One-hot Encoding):</strong> 성별, 혈액형 등 문자로 된 범주형 데이터를 기계가 연산할 수 있는 숫자 행렬 형태([1,0,0,0])로 변환한다.</li>
+                    </ul>`
+            },
+            { 
+                title: "AI 개발을 위한 필수 수학 기초", 
+                summary: "인공지능 내부의 복잡한 연산을 지탱하는 선형대수학, 미적분, 확률론 등의 핵심 수학적 배경.",
+                detail: `
+                    <div class="wiki-h2">1. 선형대수학 (Linear Algebra)</div>
+                    <div class="wiki-p">신경망에 입력되는 수만 장의 사진이나 텍스트를 컴퓨터가 효율적으로 연산하기 위해 다차원 배열 구조인 <strong>행렬(Matrix)과 텐서(Tensor)</strong>를 다룬다. 거대한 행렬의 곱셈 연산으로 치환하여 GPU에서 병렬 연산하는 것이 딥러닝 속도의 비밀이다.</div>
+                    
+                    <div class="wiki-h2">2. 미분적분학 (Calculus)</div>
+                    <div class="wiki-p">모델의 오차가 최소가 되는 지점(최적 가중치)을 찾기 위해, 현재 위치에서 <strong>편미분</strong>을 구하여 기울기(Gradient)를 알아내고, 그 반대 방향으로 이동하는 <strong>경사하강법</strong>의 근간이 된다.</div>
+
+                    <div class="wiki-h2">3. 확률과 통계 (Probability & Statistics)</div>
+                    <div class="wiki-p">AI는 확정된 정답이 아닌 '가장 그럴싸한 정답'을 내놓는 통계 모델이므로 확률 분포 이론과 베이즈 정리가 널리 쓰인다.</div>`
+            },
+            { 
+                title: "AI 윤리와 저작권 (AI Ethics & Copyright)", 
+                summary: "AI 기술의 급격한 발전으로 인해 발생하는 편향성, 블랙박스, 저작권 침해, 정렬 문제 등에 관한 사회적 담론.",
+                detail: `
+                    <div class="wiki-h2">1. 데이터 편향성(Bias)과 차별</div>
+                    <div class="wiki-p">인공지능은 인간이 만들어낸 과거의 데이터를 학습하므로, 사회에 내재된 성차별, 인종차별적 데이터가 필터링 없이 학습될 경우 편향된 판단을 내리게 된다.</div>
+                    
+                    <div class="wiki-h2">2. 블랙박스 문제와 책임 소재</div>
+                    <div class="wiki-p">수백억 개의 가중치가 얽혀 있어, 인간 개발자조차 AI가 정확히 '어떤 논리'로 판단을 내렸는지 역추적하기 어려운 <strong>블랙박스 현상</strong>이 존재한다. 의료나 자율주행 사고 시 법적 책임의 소재가 불분명해지는 원인이 된다.</div>
+
+                    <div class="wiki-h2">3. 저작권 침해 분쟁</div>
+                    <div class="wiki-p">생성형 AI 모델들이 전 세계의 저작물을 무단으로 크롤링하여 학습한 것에 대해 막대한 규모의 저작권 침해 소송이 진행 중이며, AI가 생성한 결과물의 저작권 인정 여부도 뜨거운 감자다.</div>
+
+                    <div class="wiki-h2">4. 정렬 문제 (Alignment Problem)</div>
+                    <div class="wiki-p"><strong>AI의 목표와 인간의 보편적 가치/생존이 완벽하게 일치(Align)하도록 통제하는 윤리적 안전 과제</strong>로, 강인공지능 시대를 대비하는 가장 중요한 학술적 논의 중 하나다.</div>`
+            }
+        ];
+
+        const quizDataSets = {
+            concept: [
+                { q: "딥러닝이 머신러닝과 차별화되는 가장 큰 특징은 무엇입니까?", options: ["데이터 양이 적어도 된다.", "사람이 특징(Feature)을 골라줄 필요 없이 스스로 추출한다.", "연산 속도가 무조건 빠르다.", "정답이 없는 데이터는 사용할 수 없다."], ans: 1, expl: "딥러닝은 신경망이 데이터에서 직접 특징을 추출하는 '특징 학습(Feature Learning)' 능력이 핵심입니다." },
+                { q: "인공신경망에서 출력층의 오차를 바탕으로 가중치를 수정하기 위해 거꾸로 이동하는 알고리즘은 무엇입니까?", options: ["순전파 (Forward Propagation)", "오차 역전파 (Backpropagation)", "토큰화 (Tokenization)", "스케일링 (Scaling)"], ans: 1, expl: "오차 역전파는 뒤에서부터 오차를 전달하며 연쇄 법칙을 이용해 가중치를 수정하는 과정입니다." },
+                { q: "AI 모델이 훈련 데이터는 너무 완벽히 암기했지만, 새로운 데이터에 대한 예측력은 크게 떨어지는 현상을 무엇이라 합니까?", options: ["과소적합 (Underfitting)", "과대적합 (Overfitting)", "정규화 (Regularization)", "제로샷 (Zero-shot)"], ans: 1, expl: "과대적합은 모델이 너무 복잡하여 훈련 데이터의 노이즈까지 암기해버린 상태를 뜻합니다." },
+                { q: "트랜스포머 아키텍처에서 문장 내 단어들이 서로 어떤 연관성을 가지는지 스스로 가중치를 계산하는 핵심 메커니즘은?", options: ["합성곱 (Convolution)", "셀프 어텐션 (Self-Attention)", "디퓨전 (Diffusion)", "맥스 풀링 (Max Pooling)"], ans: 1, expl: "셀프 어텐션은 단어 간의 Query, Key, Value를 내적하여 문맥의 중요도를 병렬로 계산합니다." },
+                { q: "자연어 처리 전처리 과정 중 문장을 의미를 가진 최소 단위로 쪼개는 작업은?", options: ["인코딩", "토큰화 (Tokenization)", "임베딩", "스케일링"], ans: 1, expl: "토큰화는 자연어를 컴퓨터가 처리하기 쉬운 토큰 단위로 나누는 기초 단계입니다." },
+                { q: "신경망 학습 중 오차 함수의 기울기를 따라 오차가 가장 작은 최저점을 찾아 내려가는 수학적 최적화 기법은?", options: ["경사하강법 (Gradient Descent)", "행렬 곱셈", "베이즈 추론", "의사결정 나무"], ans: 0, expl: "경사하강법은 편미분을 통해 기울기가 감소하는 방향으로 가중치를 업데이트합니다." }
+            ],
+            trend: [
+                { q: "거대 언어 모델(LLM)이 통계적 확률에 의해 존재하지 않는 사실을 마치 진실처럼 지어내어 답변하는 현상은?", options: ["할루시네이션 (환각)", "블랙박스 현상", "과대적합", "정렬 문제"], ans: 0, expl: "환각(Hallucination)은 LLM의 확률적 생성 방식이 가진 근본적 한계 중 하나입니다." },
+                { q: "LLM의 환각 현상을 방어하기 위해 외부 벡터 DB를 실시간으로 검색해 팩트 문서를 참고하도록 강제하는 기업용 AI 기술은?", options: ["RLHF", "SFT", "RAG (검색 증강 생성)", "파인튜닝"], ans: 2, expl: "RAG는 기업 실무에서 신뢰도 높은 AI를 도입하기 위한 가장 핵심적인 프레임워크입니다." },
+                { q: "텍스트뿐만 아니라 이미지, 음성, 비디오 등 다양한 형태의 데이터를 동시에 이해하고 생성하는 AI 모델의 명칭은?", options: ["싱글 모달", "멀티 모달 (Multimodal)", "교차 모달", "오픈소스 모델"], ans: 1, expl: "다양한 모달리티(Modality)를 융합하여 처리하므로 멀티 모달이라 부릅니다." },
+                { q: "이미지 생성 AI인 미드저니 등에 쓰이는 기술로, 완전한 노이즈에서 점진적으로 잡음을 걷어내며 이미지를 창조하는 모델은?", options: ["GAN (적대적 신경망)", "디퓨전 모델 (Diffusion)", "트랜스포머", "의사결정 나무"], ans: 1, expl: "디퓨전 모델은 노이즈 주입-제거 과정을 학습하여 고해상도 이미지를 합성해 냅니다." },
+                { q: "클라우드 서버 연결 없이 스마트폰 등 사용자 기기 자체에서 직접 구동되어 보안과 속도가 뛰어난 AI 기술은?", options: ["오프쇼어 AI", "온디바이스 AI (On-device AI)", "마이크로 AI", "엣지 클라우드"], ans: 1, expl: "온디바이스 AI는 인터넷 연결 없이도 프라이버시를 지키며 AI 연산이 가능합니다." },
+                { q: "AI의 목표와 지향점을 인간의 보편적 가치, 윤리와 완벽하게 일치하도록 통제하는 고난도 연구 과제를 뜻하는 용어는?", options: ["블랙박스 문제", "설명 가능 AI (XAI)", "정렬 문제 (Alignment Problem)", "프롬프트 엔지니어링"], ans: 2, expl: "정렬 문제는 강인공지능 시대를 대비한 가장 중요한 윤리/안전 과제입니다." }
+            ]
+        };
+
+        const aiConcepts = aiConceptsRaw.map((item, index) => ({ ...item, originalIndex: index }));
+        const totalConcepts = aiConcepts.length;
+        const viewedConcepts = new Set();
+        
+        let currentQuizType = '';
+        let currentQIndex = 0;
+        let userState = { concept: {}, trend: {} };
+
+        function switchPage(pageId) {
+            document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-menu li').forEach(m => m.classList.remove('active-menu'));
+            document.getElementById(pageId).classList.add('active');
+            
+            if(pageId === 'page-main') document.getElementById('menu-main').classList.add('active-menu');
+            else if(pageId === 'page-concept') document.getElementById('menu-concept').classList.add('active-menu');
+            else if(pageId === 'page-trend') document.getElementById('menu-trend').classList.add('active-menu');
+            else if(pageId === 'page-quiz-intro' || pageId === 'page-quiz-active') document.getElementById('menu-quiz-intro').classList.add('active-menu');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function updateProgress() {
+            const percentage = Math.floor((viewedConcepts.size / totalConcepts) * 100);
+            document.getElementById('progress-text').innerText = `${percentage}% 완료`;
+            document.getElementById('progress-fill').style.width = `${percentage}%`;
+        }
+
+        function renderConceptList(dataList) {
+            const container = document.getElementById('conceptListContainer');
+            container.innerHTML = ''; 
+            if(dataList.length === 0) {
+                container.innerHTML = '<div style="padding:40px; text-align:center; color:#888;">해당하는 표제어가 없습니다.</div>';
+                return;
+            }
+            dataList.forEach((item) => {
+                const isViewed = viewedConcepts.has(item.originalIndex) ? 'viewed' : '';
+                container.innerHTML += `
+                    <div class="concept-item ${isViewed}" id="list-item-${item.originalIndex}">
+                        <span class="concept-title" onclick="openModal(${item.originalIndex})">${item.title}</span>
+                        <div class="concept-summary">${item.summary}</div>
+                    </div>`;
+            });
+        }
+
+        function executeSearch() {
+            const kw = document.getElementById('mainSearchInput').value.trim().toLowerCase();
+            switchPage('page-concept');
+            const filtered = aiConcepts.filter(item => item.title.toLowerCase().includes(kw) || item.summary.toLowerCase().includes(kw) || item.detail.toLowerCase().includes(kw));
+            renderConceptList(filtered);
+        }
+
+        function openModal(originalIndex) {
+            const data = aiConcepts.find(i => i.originalIndex === originalIndex);
+            document.getElementById('modal-title').innerText = data.title;
+            document.getElementById('modal-content').innerHTML = data.detail;
+            document.getElementById('conceptModal').style.display = 'flex';
+            document.body.style.overflow = 'hidden'; 
+            
+            if (!viewedConcepts.has(originalIndex)) {
+                viewedConcepts.add(originalIndex);
+                updateProgress();
+                const listItem = document.getElementById(`list-item-${originalIndex}`);
+                if(listItem) listItem.classList.add('viewed');
+            }
+        }
+
+        function closeModal() {
+            document.getElementById('conceptModal').style.display = 'none';
+            document.body.style.overflow = 'auto'; 
+        }
+
+        function prepareQuiz(type) {
+            currentQuizType = type;
+            currentQIndex = 0;
+            userState[type] = {}; 
+            
+            document.getElementById('quizActiveContainer').style.display = 'block';
+            document.getElementById('quizResultContainer').style.display = 'none';
+            
+            switchPage('page-quiz-active');
+            renderSingleQuestion();
+        }
+
+        function renderSingleQuestion() {
+            const data = quizDataSets[currentQuizType];
+            const q = data[currentQIndex];
+            
+            document.getElementById('quizProgressText').innerText = `문항 ${currentQIndex + 1} / ${data.length}`;
+            document.getElementById('quizQuestionText').innerText = `Q. ${q.q}`;
+            
+            const optionsContainer = document.getElementById('quizOptionsContainer');
+            optionsContainer.innerHTML = '';
+            q.options.forEach((opt, oIdx) => {
+                optionsContainer.innerHTML += `<div class="quiz-option" onclick="selectOption(${oIdx})" id="opt-${oIdx}">${oIdx + 1}) ${opt}</div>`;
+            });
+
+            const nextBtn = document.getElementById('quizNextBtn');
+            if (currentQIndex === data.length - 1) {
+                nextBtn.innerText = "최종 제출 및 채점하기";
+                nextBtn.style.background = "#03c75a"; 
+            } else {
+                nextBtn.innerText = "다음 문항으로";
+                nextBtn.style.background = "#111";
+            }
+        }
+
+        function selectOption(oIdx) {
+            userState[currentQuizType][currentQIndex] = oIdx;
+            const options = document.getElementById('quizOptionsContainer').querySelectorAll('.quiz-option');
+            options.forEach(opt => opt.classList.remove('selected'));
+            document.getElementById(`opt-${oIdx}`).classList.add('selected');
+        }
+
+        function handleNextQuestion() {
+            const currentSelected = userState[currentQuizType][currentQIndex];
+            if (currentSelected === undefined) {
+                alert("답안을 선택해주십시오.");
+                return;
+            }
+
+            const data = quizDataSets[currentQuizType];
+            if (currentQIndex < data.length - 1) {
+                currentQIndex++;
+                renderSingleQuestion();
+            } else {
+                evaluateQuiz(); 
+            }
+        }
+
+        function evaluateQuiz() {
+            const data = quizDataSets[currentQuizType];
+            const state = userState[currentQuizType];
+            
+            let score = 0; 
+            let wrongHTML = '';
+            
+            data.forEach((q, i) => {
+                if (state[i] === q.ans) {
+                    score++;
+                } else {
+                    wrongHTML += `
+                        <div class="wrong-item">
+                            <h4>문항 ${i+1}. ${q.q}</h4>
+                            <div class="user-ans">❌ 선택한 오답: ${q.options[state[i]]}</div>
+                            <div class="correct-ans">✅ 올바른 정답: ${q.options[q.ans]}</div>
+                            <div class="explanation"><strong>[전문가 해설]</strong><br>${q.expl}</div>
+                        </div>`;
+                }
+            });
+
+            document.getElementById('quizActiveContainer').style.display = 'none';
+            const resultContainer = document.getElementById('quizResultContainer');
+            resultContainer.style.display = 'block';
+            
+            document.getElementById('resultScoreText').innerText = `${score} / ${data.length} 정답`;
+            
+            const wrongContainer = document.getElementById('resultWrongAnswers');
+            if(score === data.length) {
+                wrongContainer.innerHTML = '<div style="text-align:center; padding:40px; font-size:18px; font-weight:800; color:#03c75a;">축하합니다. 모든 문항의 정답을 맞히셨습니다.</div>';
+            } else {
+                wrongContainer.innerHTML = wrongHTML;
+            }
+        }
+
+        function exitQuiz() {
+            if(confirm("평가를 중단하시겠습니까? 진행 사항은 저장되지 않습니다.")) {
+                switchPage('page-quiz-intro');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderConceptList(aiConcepts);
+            updateProgress();
+        });
+    </script>
+</body>
+</html>
