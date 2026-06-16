@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>메일링 에이전트 AI</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- App Container -->
+    <div class="app-container">
+
+        <!-- ===== LEFT: Chat ===== -->
+        <div class="chat-container">
+            <!-- Header -->
+            <header class="chat-header">
+                <div class="top-row">
+                    <div class="avatar">📧</div>
+                    <div class="info">
+                        <h2>메일링 에이전트 AI</h2>
+                        <div class="status">
+                            <span class="dot"></span>
+                            <span id="statusText">대기 중</span>
+                        </div>
+                    </div>
+                    <div class="header-actions">
+                        <button id="stopBtn" title="실행 중지" aria-label="Stop" style="display:none;">⏹️</button>
+                        <button id="clearBtn" title="대화 초기화" aria-label="Clear chat">🗑️</button>
+                    </div>
+                </div>
+                <div class="step-indicator" id="stepIndicator">💡 메일 작성을 도와드립니다</div>
+            </header>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions" id="quickActions"></div>
+
+            <!-- Messages -->
+            <div class="chat-messages" id="chatMessages" role="log" aria-live="polite"></div>
+
+            <!-- Typing -->
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="msg-avatar" style="width:30px;height:30px;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;">📧</div>
+                <div class="dots"><span></span><span></span><span></span></div>
+            </div>
+
+            <!-- Input -->
+            <footer class="chat-input">
+                <div class="input-wrapper">
+                    <textarea id="chatTextarea" rows="1" placeholder="메일 작성 요청을 입력하세요..." aria-label="메시지 입력"></textarea>
+                    <button class="send-btn" id="sendBtn" aria-label="전송">➤</button>
+                </div>
+            </footer>
+        </div>
+
+        <!-- ===== RIGHT: TAO Panel ===== -->
+        <div class="tao-panel" id="taoPanel">
+            <div class="tao-header">
+                <h3>
+                    <span>🧠</span>
+                    <span>TAO 로그</span>
+                </h3>
+                <button class="tao-toggle" id="taoToggle" title="TAO 패널 접기" aria-label="Toggle TAO panel">◀</button>
+            </div>
+            <div class="tao-body" id="taoBody">
+                <div class="tao-empty" id="taoEmpty">
+                    아직 실행된 TAO 기록이 없습니다.<br>
+                    메일 작성 요청을 입력해주세요.
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="tools.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
