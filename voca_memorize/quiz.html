@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>단어 퀴즈</title>
+    <style>
+        /* 기존 디자인 유지 */
+        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; display: flex; flex-direction: column; min-height: 90vh; }
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        .header a { text-decoration: none; color: #666; font-weight: bold; }
+        .progress-text { font-weight: bold; color: #333; }
+        .progress-bar-bg { background-color: #e0e0e0; height: 10px; border-radius: 5px; margin-bottom: 30px; overflow: hidden; }
+        /* 진행률 바 채워지는 효과 부드럽게 (transition 추가) */
+        .progress-bar-fill { background-color: #4CAF50; width: 0%; height: 100%; transition: width 0.3s ease; }
+        .question-card { background-color: white; padding: 50px 20px; border-radius: 16px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); margin-bottom: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+        .question-word { font-size: 48px; font-weight: 900; color: #333; margin: 0; letter-spacing: 2px; }
+        .question-hint { color: #888; margin-top: 15px; font-size: 14px; }
+        .answer-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-answer { background-color: white; border: 2px solid #ddd; padding: 25px 10px; font-size: 18px; font-weight: bold; border-radius: 12px; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.02); transition: all 0.2s; }
+        /* 버튼을 비활성화(클릭 방지) 했을 때의 디자인 */
+        .btn-answer:disabled { cursor: not-allowed; }
+        
+        /* 퀴즈 완료 화면용 버튼 */
+        .btn-finish { display: inline-block; background-color: #2196F3; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-size: 18px; font-weight: bold; margin-top: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <a href="index.html">⬅️ 그만두기</a>
+        <!-- JS로 숫자를 바꿀 수 있도록 id 추가 -->
+        <div id="progress-text" class="progress-text">진도: 0 / 0</div>
+    </div>
+    
+    <div class="progress-bar-bg">
+        <!-- JS로 너비를 조절할 수 있도록 id 추가 -->
+        <div id="progress-fill" class="progress-bar-fill"></div>
+    </div>
+
+    <!-- id 추가하여 JS가 이 구역을 통째로 바꿀 수 있게 함 -->
+    <div id="question-area" class="question-card">
+        <h2 id="question-word" class="question-word">Apple</h2>
+        <div class="question-hint">👉 이 단어의 올바른 뜻은?</div>
+    </div>
+
+    <!-- 버튼들을 품을 빈 껍데기 상자 (JS가 여기에 버튼을 채워 넣습니다) -->
+    <div id="answer-grid" class="answer-grid"></div>
+
+    <!-- 💡 대망의 퀴즈 로직 자바스크립트 -->
+    <script>
+        // 1. 필요한 데이터 불러오기
+        const vocaData = JSON.parse(localStorage.getItem('vocaData')) || {};
+        const selectedFolders = JSON.parse(localStorage.getItem('selectedFolders')) || [];
+        
+        let quizWords = []; // 오늘 시험 볼 단어들이 담길 통
+        let allMeanings = []; // 오답 보기를 만들기 위한 '모든 한글 뜻' 모음집
+
+        // 선택된 폴더에서 단어 뽑아오기 & 모든 뜻 수집하기
+        for (let folder in vocaData) {
+            vocaData[folder].forEach(word => {
+                // 오답용으로 쓰기 위해 뜻만 따로 모아둡니다
+                if (!allMeanings.includes(word.ko)) {
+                    allMeanings.push(word.ko);
+                }
+                // 만약 이 폴더가 내가 '시험 보겠다'고 체크한 폴더면 quizWords에 추가합니다
+                if (selectedFolders.includes(folder)) {
+                    quizWords.push(word);
+                }
+            });
+        }
+
+        // 배열을 무작위로 섞어주는 요술 지팡이 함수
+        function shuffle(array) {
+            return array.sort(() => Math.random() - 0.5);
+        }
+
+        // 시험 볼 단어들의 순서를 랜덤으로 섞어줍니다
+        quizWords = shuffle(quizWords);
+
+        // 퀴즈 진행 상태 변수들
+        let currentIndex = 0; // 현재 몇 번 문제인지 (0번부터 시작)
+
+        // 화면 요소들 미리 찾아두기
+        const progressText = document.getElementById('progress-text');
+        const progressFill = document.getElementById('progress-fill');
+        const questionWord = document.getElementById('question-word');
+        const answerGrid = document.getElementById('answer-grid');
+        const questionArea = document.getElementById('question-area');
+
+        // 2. 화면에 문제 띄우기 함수
+        function loadQuestion() {
+            // 모든 문제를 다 풀었을 때의 처리
+            if (currentIndex >= quizWords.length) {
+                showFinishScreen();
+                return;
+            }
+
+            // 현재 문제 가져오기
+            let currentWord = quizWords[currentIndex];
+
+            // 상단 진도율 업데이트
+            progressText.textContent = `진도: ${currentIndex + 1} / ${quizWords.length}`;
+            progressFill.style.width = `${((currentIndex + 1) / quizWords.length) * 100}%`;
+
+            // 중앙 영어 단어 업데이트
+            questionWord.textContent = currentWord.en;
+
+            // 4지 선다 보기 만들기 (정답 1개 + 오답 3개)
+            let choices = [currentWord.ko]; // 정답을 먼저 넣습니다
+            
+            // 모든 한글 뜻 중에서 정답이 아닌 것만 골라낸 뒤, 섞어서 3개를 뽑습니다
+            let wrongChoices = allMeanings.filter(meaning => meaning !== currentWord.ko);
+            wrongChoices = shuffle(wrongChoices).slice(0, 3);
+            
+            // 정답 1개와 오답 3개를 합친 뒤 다시 섞어줍니다 (항목 위치 랜덤화)
+            choices = choices.concat(wrongChoices);
+            choices = shuffle(choices);
+
+            // 보기 버튼 생성하기
+            answerGrid.innerHTML = ''; // 이전 버튼들 지우기
+            const numberIcons = ['①', '②', '③', '④']; // 보기 번호 아이콘
+
+            choices.forEach((choice, index) => {
+                let btn = document.createElement('button');
+                btn.className = 'btn-answer';
+                btn.textContent = `${numberIcons[index]} ${choice}`;
+                
+                // 버튼을 눌렀을 때 '정답 확인 함수'가 실행되도록 연결
+                btn.onclick = () => checkAnswer(choice, currentWord.ko, btn);
+                
+                answerGrid.appendChild(btn);
+            });
+        }
+
+        // 3. 정답 확인 함수
+        function checkAnswer(selectedChoice, correctChoice, clickedBtn) {
+            // 더 이상 다른 버튼을 누를 수 없도록 모든 버튼 잠금
+            const allBtns = document.querySelectorAll('.btn-answer');
+            allBtns.forEach(btn => btn.disabled = true);
+
+            // 정답인지 오답인지 색상으로 피드백 주기
+            if (selectedChoice === correctChoice) {
+                // 맞췄을 때: 누른 버튼 초록색
+                clickedBtn.style.backgroundColor = '#4CAF50';
+                clickedBtn.style.color = 'white';
+            } else {
+                // 틀렸을 때: 누른 버튼 빨간색
+                clickedBtn.style.backgroundColor = '#ff4c4c';
+                clickedBtn.style.color = 'white';
+                
+                // 진짜 정답이 뭐였는지 초록색 테두리로 알려주기
+                allBtns.forEach(btn => {
+                    if (btn.textContent.includes(correctChoice)) {
+                        btn.style.border = '3px solid #4CAF50';
+                    }
+                });
+            }
+
+            // 1초(1000밀리초) 뒤에 다음 문제로 넘어갑니다
+            setTimeout(() => {
+                currentIndex++;
+                loadQuestion();
+            }, 1000);
+        }
+
+        // 4. 테스트 완료 화면 띄우기 함수
+        function showFinishScreen() {
+            // 버튼들 숨기기
+            answerGrid.innerHTML = '';
+            
+            // 중앙 영역을 축하 메시지로 변경
+            questionArea.innerHTML = `
+                <h2 style="font-size: 36px; color: #4CAF50; margin: 0;">🎉 테스트 완료!</h2>
+                <p style="color: #666; font-size: 18px; margin-top: 15px;">
+                    총 ${quizWords.length}단어의 학습을 마쳤습니다.
+                </p>
+                <a href="index.html" class="btn-finish">메인으로 돌아가기</a>
+            `;
+        }
+
+        // 앱 시작! 첫 번째 문제 불러오기
+        loadQuestion();
+    </script>
+</body>
+</html>

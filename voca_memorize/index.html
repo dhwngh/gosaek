@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 영단어장</title>
+    
+    <!-- 디자인(CSS)을 담당하는 구역입니다 -->
+    <style>
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            text-align: center; /* 모든 글자를 가운데 정렬 */
+            background-color: #f4f6f8; /* 아주 연한 회색 배경 */
+            margin-top: 100px; /* 위쪽 여백 */
+        }
+        h1 {
+            color: #333333;
+            margin-bottom: 50px;
+            font-size: 32px;
+        }
+        /* 버튼들을 세로로 정렬하기 위한 상자 */
+        .menu-box {
+            display: flex;
+            flex-direction: column; /* 세로 방향으로 쌓기 */
+            gap: 20px; /* 버튼 사이의 간격 */
+            max-width: 300px; /* 버튼 최대 너비 */
+            margin: 0 auto; /* 상자 자체를 화면 가운데로 */
+        }
+        /* 버튼 기본 디자인 */
+        .btn {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none; /* 링크의 기본 밑줄 제거 */
+            border-radius: 12px; /* 모서리를 둥글게 */
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); /* 살짝 그림자 효과 */
+            color: white;
+        }
+        /* 각 버튼의 색상 지정 */
+        .btn-register { background-color: #4CAF50; } /* 초록색 */
+        .btn-test { background-color: #2196F3; } /* 파란색 */
+    </style>
+</head>
+<body>
+
+    <!-- 화면에 보이는 실제 내용(HTML) 구역입니다 -->
+    <h1>나만의 영단어장 📖</h1>
+
+    <div class="menu-box">
+        <!-- href="..." 안에는 클릭 시 이동할 파일 이름을 적습니다 -->
+        <a href="register.html" class="btn btn-register">📝 단어 등록하기</a>
+        <a href="test_setup.html" class="btn btn-test">🌟 단어 테스트 보러가기</a>
+    </div>
+
+</body>
+</html>

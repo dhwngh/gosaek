@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>단어장 관리</title>
+    <script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+    <style>
+        body { font-family: 'Pretendard', 'Malgun Gothic', sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; }
+        .card { background-color: white; padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); margin-bottom: 25px; }
+        
+        /* 폴더 선택창 z-index 우선순위 보정 */
+        .folder-controls { 
+            display: flex; 
+            gap: 10px; 
+            margin-top: 10px; 
+            position: relative; 
+            z-index: 100; 
+        }
+        .folder-controls select { 
+            flex-grow: 1; 
+            padding: 12px; 
+            border-radius: 8px; 
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+        .folder-controls button { width: auto; padding: 10px 15px; border-radius: 8px; border: none; cursor: pointer; white-space: nowrap; }
+        
+        button { padding: 12px; border-radius: 8px; border: none; cursor: pointer; font-weight: bold; width: 100%; margin-top: 10px; }
+        .btn-primary { background-color: #4CAF50; color: white; }
+        .btn-secondary { background-color: #eeeeee; color: #333; }
+        .btn-danger { background-color: #ff4c4c; color: white; }
+        .btn-scan { background-color: #ff9800; color: white; }
+        
+        #camera-container { display: none; margin-top: 15px; }
+        video { width: 100%; border-radius: 8px; background: #000; }
+        .word-list { list-style: none; padding: 0; }
+        .word-list li { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid #eee; }
+        .btn-delete { width: auto; padding: 5px 10px; background-color: #ff4c4c; color: white; border-radius: 6px; }
+    </style>
+</head>
+<body>
+
+    <div style="margin-bottom: 20px;">
+        <a href="index.html" style="text-decoration:none; color:#333; font-weight:bold;">⬅️ 메인으로 돌아가기</a>
+    </div>
+
+    <div class="card">
+        <h3>📂 폴더 관리</h3>
+        <div class="folder-controls">
+            <select id="folder-select"></select>
+            <button id="btn-edit-folder" class="btn-secondary">✏️ 수정</button>
+        </div>
+        <button id="btn-new-folder" class="btn-secondary">➕ 새 폴더 만들기</button>
+        <button id="btn-delete-folder" class="btn-danger">🗑️ 현재 폴더 삭제</button>
+    </div>
+
+    <div class="card">
+        <h3>새 단어 등록</h3>
+        <button id="btn-open-camera" class="btn-scan">📸 카메라로 스캔하기</button>
+        <div id="camera-container">
+            <video id="video" autoplay playsinline></video>
+            <button id="btn-capture" class="btn-scan" style="background-color: #2196F3;">📷 스캔 시작</button>
+        </div>
+        <canvas id="canvas" style="display:none;"></canvas>
+
+        <div style="margin-top:20px; border-top:1px solid #eee; padding-top:10px;">
+            <p style="font-size: 14px; color: #666;">📄 PDF에서 가져오기</p>
+            <input type="file" id="pdf-input" accept="application/pdf">
+        </div>
+        <textarea id="import-text" style="width:100%; height:80px; margin-top:10px; border:1px solid #ddd; border-radius:8px;" placeholder="PDF 추출 내용"></textarea>
+        <button id="btn-parse-text" class="btn-secondary">⚙️ 텍스트 변환 및 등록</button>
+
+        <input type="text" id="input-eng" placeholder="🇬🇧 영어 단어" style="width:100%; padding:12px; margin-top:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        <input type="text" id="input-kor" placeholder="🇰🇷 한글 뜻" style="width:100%; padding:12px; margin-top:10px; border:1px solid #ddd; border-radius:8px; box-sizing:border-box;">
+        <button id="btn-add-word" class="btn-primary">➕ 단어 추가하기</button>
+    </div>
+
+    <div class="card">
+        <h3 id="folder-title">현재 폴더 단어</h3>
+        <ul id="word-list" class="word-list"></ul>
+    </div>
+
+    <script>
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            let vocaData = JSON.parse(localStorage.getItem('vocaData')) || { "내 단어장": [] };
+            const folderSelect = document.getElementById('folder-select');
+            const wordList = document.getElementById('word-list');
+            const folderTitle = document.getElementById('folder-title');
+            
+            function renderScreen() {
+                let current = folderSelect.value;
+                folderSelect.innerHTML = '';
+                for (let folderName in vocaData) {
+                    let option = document.createElement('option');
+                    option.value = folderName;
+                    option.textContent = folderName;
+                    folderSelect.appendChild(option);
+                }
+                if (vocaData[current]) folderSelect.value = current;
+                renderWords();
+            }
+
+            function renderWords() {
+                let cur = folderSelect.value;
+                if (!cur) return;
+                folderTitle.textContent = `📂 ${cur} (총 ${vocaData[cur].length}개)`;
+                wordList.innerHTML = '';
+                vocaData[cur].forEach((word, idx) => {
+                    let li = document.createElement('li');
+                    li.innerHTML = `<span><strong>${word.en}</strong> - ${word.ko}</span>
+                                    <button class="btn-delete" onclick="deleteWord(${idx})">삭제</button>`;
+                    wordList.appendChild(li);
+                });
+            }
+
+            function saveData() {
+                localStorage.setItem('vocaData', JSON.stringify(vocaData));
+                renderScreen();
+            }
+
+            // PDF/카메라 로직
+            document.getElementById('pdf-input').onchange = async (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                alert("PDF 분석 중...");
+                const reader = new FileReader();
+                reader.onload = async function() {
+                    try {
+                        const pdf = await pdfjsLib.getDocument(new Uint8Array(this.result)).promise;
+                        let text = "";
+                        for(let i=1; i<=pdf.numPages; i++) {
+                            const page = await pdf.getPage(i);
+                            const content = await page.getTextContent();
+                            text += content.items.map(item => item.str).join("\n") + "\n";
+                        }
+                        document.getElementById('import-text').value = text;
+                    } catch(err) { alert("PDF 읽기 실패: " + err.message); }
+                    finally { e.target.value = ''; }
+                };
+                reader.readAsArrayBuffer(file);
+            };
+
+            // PDF 파싱 로직 (대시 제거 포함)
+            document.getElementById('btn-parse-text').onclick = () => {
+                const lines = document.getElementById('import-text').value.split('\n').filter(l => l.trim() !== "");
+                let count = 0;
+                
+                for (let i = 0; i < lines.length; i += 2) {
+                    if (i + 1 < lines.length) {
+                        let en = lines[i].trim();
+                        let ko = lines[i+1].trim();
+                        
+                        // 뜻 앞의 대시, 콜론 제거
+                        ko = ko.replace(/^-+/, "").replace(/^:+/, "").trim();
+                        en = en.replace(/-/g, "").trim(); 
+                        
+                        vocaData[folderSelect.value].push({en: en, ko: ko});
+                        count++;
+                    }
+                }
+                saveData();
+                alert(`${count}개의 단어가 등록되었습니다!`);
+                document.getElementById('import-text').value = "";
+            };
+
+            // 폴더 및 단어 이벤트
+            document.getElementById('btn-new-folder').onclick = () => { let name = prompt("새 폴더 이름:"); if(name && !vocaData[name]) { vocaData[name] = []; saveData(); } };
+            document.getElementById('btn-edit-folder').onclick = () => { 
+                let old = folderSelect.value; let next = prompt("새 이름:", old);
+                if(next && next !== old && !vocaData[next]) { vocaData[next] = vocaData[old]; delete vocaData[old]; saveData(); folderSelect.value = next; }
+            };
+            document.getElementById('btn-delete-folder').onclick = () => { if(Object.keys(vocaData).length <= 1) { alert("최소 하나는 있어야 해요."); return; } if(confirm("정말 삭제?")) { delete vocaData[folderSelect.value]; saveData(); } };
+            document.getElementById('btn-add-word').onclick = () => {
+                let en = document.getElementById('input-eng').value.trim();
+                let ko = document.getElementById('input-kor').value.trim();
+                if (/[ㄱ-ㅎ|ㅏ-ㅣ|가-힣]/.test(en)) { alert("영어 칸에 한글 금지!"); return; }
+                if(!en || !ko) return;
+                vocaData[folderSelect.value].push({en, ko});
+                saveData();
+                document.getElementById('input-eng').value = '';
+                document.getElementById('input-kor').value = '';
+            };
+            
+            // 카메라 로직
+            document.getElementById('btn-open-camera').onclick = async () => {
+                document.getElementById('camera-container').style.display = 'block';
+                const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                document.getElementById('video').srcObject = stream;
+            };
+            document.getElementById('btn-capture').onclick = async () => {
+                const canvas = document.getElementById('canvas');
+                const video = document.getElementById('video');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                canvas.getContext('2d').drawImage(video, 0, 0);
+                alert("스캔 중...");
+                const { data: { text } } = await Tesseract.recognize(canvas, 'eng+kor');
+                const lines = text.split('\n').filter(l => l.trim());
+                if(lines.length >= 2) {
+                    document.getElementById('input-eng').value = lines[0].trim();
+                    document.getElementById('input-kor').value = lines[1].trim();
+                }
+                document.getElementById('camera-container').style.display = 'none';
+                video.srcObject.getTracks().forEach(t => t.stop());
+            };
+
+            window.deleteWord = (idx) => { vocaData[folderSelect.value].splice(idx, 1); saveData(); };
+            folderSelect.onchange = renderWords;
+            renderScreen();
+        });
+    </script>
+</body>
+</html>
