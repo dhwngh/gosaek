@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>나만의 영단어장</title>
+    
+    <style>
+        /* 💡 사진 크기를 120px로 키웠습니다 */
+        .top-left-img {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 120px;
+            height: 120px;
+            border-radius: 50%; 
+            object-fit: cover;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Pretendard', 'Malgun Gothic', sans-serif;
+            text-align: center; 
+            background-color: #f4f6f8; 
+            margin-top: 100px; 
+        }
+        h1 {
+            color: #333333;
+            margin-bottom: 50px;
+            font-size: 32px;
+        }
+        .menu-box {
+            display: flex;
+            flex-direction: column; 
+            gap: 20px; 
+            max-width: 300px; 
+            margin: 0 auto; 
+        }
+        .btn {
+            padding: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            text-decoration: none; 
+            border-radius: 12px; 
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1); 
+            color: white;
+        }
+        .btn-register { background-color: #4CAF50; } 
+        .btn-test { background-color: #2196F3; } 
+    </style>
+</head>
+<body>
+
+    <!-- 이미지 파일 경로(img/이나경1.jpg)가 정확한지 확인해주세요 -->
+    <img src="img/이나경1.jpg" alt="이나경" class="top-left-img">
+
+    <h1>나만의 영단어장 📖</h1>
+
+    <div class="menu-box">
+        <a href="register.html" class="btn btn-register">📝 단어 등록하기</a>
+        <a href="test_setup.html" class="btn btn-test">🌟 단어 테스트 보러가기</a>
+    </div>
+
+</body>
+</html>
